@@ -8,7 +8,7 @@
   "scripts": {
     "dev": "webpack-dev-server",
     "build": "webpack",
-    "demo:deploy": "npm run build && gh-pages -d demo/"
+    "deploy": "npm run build && gh-pages -d web/"
   },
   "repository": {
     "type": "git",

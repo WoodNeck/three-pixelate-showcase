@@ -8,6 +8,7 @@
       "tslint-eslint-rules"
     ],
     "rules": {
+			"indent": [true, "tabs"],
       "quotemark": [true, "double"],
       "variable-name": false,
       "arrow-parens": false,

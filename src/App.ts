@@ -1,30 +1,33 @@
-/*
- * App.ts
- * ===========
- * Entry from Webpack, generates Three.js View
- */
-
 import View from "./webgl/View";
+import Shape from "./webgl/entity/Shape";
+import Entity from "./webgl/entity/Entity";
 
 class App {
 	private view: View;
+	private entities: Entity[];
 
 	constructor() {
-		const canvasBox = <HTMLCanvasElement>document.getElementById("webgl-canvas");
+		const canvasBox = document.getElementById("webgl-canvas") as HTMLCanvasElement;
 		this.view = new View(canvasBox);
 
-		window.addEventListener("resize", this.resize);
+		const torus = new Shape();
+		this.entities = [];
+		this.entities.push(torus);
+
+		this.view.add(torus);
+
 		this.update(0);
 	}
 
-	private resize = (): void => {
-		this.view.onWindowResize(window.innerWidth, window.innerHeight);
-	}
-
 	private update = (t: number): void => {
-		this.view.update(t / 1000);
+		const time = t / 1000;
+
+		this.entities.forEach(entity => entity.update(time));
+		this.view.update();
+
 		requestAnimationFrame(this.update);
 	}
 }
 
-const app = new App();
+// tslint:disable-next-line no-unused-expression
+new App();
