@@ -10,7 +10,7 @@ class App {
 	private _geoScene: GeometryScene;
 	private _foreScene: ForegroundScene;
 	private _renderTarget: THREE.WebGLRenderTarget;
-	private _pixelateScale: number = 10;
+	private _pixelateScale: number = 8;
 
 	constructor() {
 		const canvasBox = document.getElementById("webgl-canvas") as HTMLCanvasElement;
@@ -38,8 +38,14 @@ class App {
 		const foreScene = this._foreScene;
 
 		// Entities on geometry scene (before pixelating)
-		const tile = new Tile();
+		const tile = new Tile(1, 0, 0);
+		const tile2 = new Tile(0, 1, 0);
+		const tile3 = new Tile(1, 2, 0);
+		const tile4 = new Tile(1, 1, 1);
 		geoScene.add(tile);
+		geoScene.add(tile2);
+		geoScene.add(tile3);
+		geoScene.add(tile4);
 
 		// Entities on foreground scene (after pixelating)
 		const plane = new TexturePlane(this._renderTarget.texture);

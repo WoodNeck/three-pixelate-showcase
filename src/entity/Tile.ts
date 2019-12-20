@@ -8,25 +8,20 @@ export default class Tile implements Entity {
 
 	public get mesh() { return this._mesh; }
 
-	public constructor() {
-		const geometry = new THREE.TorusBufferGeometry(5, 1, 32, 32);
+	constructor(x: number, y: number, z: number) {
+		const height = 2;
+		const h2 = height * 2;
+
+		const geometry = new THREE.BoxGeometry(h2, h2, height);
 		const material = new THREE.RawShaderMaterial({
-			uniforms: {
-				time: { value: 0 },
-			},
 			vertexShader,
 			fragmentShader,
 		});
 		this._mesh = new THREE.Mesh(geometry, material);
+		this._mesh.translateX(h2 * x);
+		this._mesh.translateY(h2 * y);
+		this._mesh.translateZ(height * z);
 	}
 
-	public update(ms: number) {
-		const time = ms / 1000;
-
-		this._mesh.rotation.set(
-			Math.sin(time / 10) * 2 * Math.PI,
-			Math.cos(time / 10) * 2 * Math.PI,
-			0,
-		);
-	}
+	public update(ms: number) {}
 }

@@ -4,7 +4,7 @@ import Scene from "./Scene";
 export default class GeometryScene extends Scene {
 	private _scene: THREE.Scene;
 	private _camera: THREE.OrthographicCamera;
-	private _zoom: number;
+	private _zoom: number = 64;
 
 	public get scene() { return this._scene; }
 	public get camera() { return this._camera; }
@@ -14,13 +14,12 @@ export default class GeometryScene extends Scene {
 	constructor() {
 		super();
 
-		this._zoom = 80;
-
 		this._scene = new THREE.Scene();
 		this._scene.background = new THREE.TextureLoader().load("./textures/bgnd.png");
 
-		this._camera = new THREE.OrthographicCamera(0, 0, 0, 0);
-		this._camera.position.z = 15;
+		this._camera = new THREE.OrthographicCamera(0, 0, 0, 0, 0);
+		this._camera.rotateZ(-THREE.Math.DEG2RAD * 45);
+		this._camera.rotateX(THREE.Math.DEG2RAD * 60);
 	}
 
 	public resize(width: number, height: number) {
@@ -33,5 +32,9 @@ export default class GeometryScene extends Scene {
 		camera.bottom = -height / zoom;
 
 		camera.updateProjectionMatrix();
+	}
+
+	public update(ms: number) {
+		this._camera.rotateOnWorldAxis(new THREE.Vector3(0, 0, 1), -THREE.Math.DEG2RAD * 1);
 	}
 }
