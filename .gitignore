@@ -92,3 +92,4 @@ typings/
 # Personal additions
 to-do.txt
 package-lock.json
+.DS_Store

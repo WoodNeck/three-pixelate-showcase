@@ -9,8 +9,6 @@ class App {
 	private _renderer: Renderer;
 	private _geoScene: GeometryScene;
 	private _foreScene: ForegroundScene;
-	private _renderTarget: THREE.WebGLRenderTarget;
-	private _pixelateScale: number = 8;
 
 	constructor() {
 		const canvasBox = document.getElementById("webgl-canvas") as HTMLCanvasElement;
@@ -20,12 +18,6 @@ class App {
 		this._foreScene = new ForegroundScene();
 
 		this._onResize();
-
-		const drawingSize = this._renderer.size;
-		const pixelateScale = this._pixelateScale;
-		this._renderTarget = new THREE.WebGLRenderTarget(
-			drawingSize.x / pixelateScale, drawingSize.y / pixelateScale,
-		);
 
 		this._constructScene();
 
@@ -39,16 +31,33 @@ class App {
 
 		// Entities on geometry scene (before pixelating)
 		const tile = new Tile(1, 0, 0);
-		const tile2 = new Tile(0, 1, 0);
-		const tile3 = new Tile(1, 2, 0);
-		const tile4 = new Tile(1, 1, 1);
+		const tile2 = new Tile(2, -1, 0);
+		const tile3 = new Tile(0, 1, 0);
+		const tile4 = new Tile(-1, 2, 0);
+		const tile5 = new Tile(3, -2, 0);
+		const tile6 = new Tile(4, -3, 0);
+		const tile7 = new Tile(-2, 3, 0);
+		const tile8 = new Tile(-3, 4, 0);
+		const tile9 = new Tile(5, -4, 0);
+		const tile10 = new Tile(6, -5, 0);
+		const tile11 = new Tile(-4, 5, 0);
+		const tile12 = new Tile(-5, 6, 0);
+
 		geoScene.add(tile);
 		geoScene.add(tile2);
 		geoScene.add(tile3);
 		geoScene.add(tile4);
+		geoScene.add(tile5);
+		geoScene.add(tile6);
+		geoScene.add(tile7);
+		geoScene.add(tile8);
+		geoScene.add(tile9);
+		geoScene.add(tile10);
+		geoScene.add(tile11);
+		geoScene.add(tile12);
 
 		// Entities on foreground scene (after pixelating)
-		const plane = new TexturePlane(this._renderTarget.texture);
+		const plane = new TexturePlane(geoScene.renderTarget.texture);
 		foreScene.add(plane);
 	}
 
@@ -63,7 +72,7 @@ class App {
 		renderer.update(t);
 
 		// Render each scenes
-		renderer.renderToTexture(geoScene, this._renderTarget);
+		renderer.renderToTexture(geoScene, geoScene.renderTarget);
 		renderer.render(foreScene); // render target is binded to plnae in foreScene
 
 		requestAnimationFrame(this._render);

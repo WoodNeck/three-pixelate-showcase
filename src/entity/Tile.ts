@@ -9,8 +9,8 @@ export default class Tile implements Entity {
 	public get mesh() { return this._mesh; }
 
 	constructor(x: number, y: number, z: number) {
-		const height = 2;
-		const h2 = height * 2;
+		const height = 1;
+		const h2 = height * 2 * Math.SQRT2;
 
 		const geometry = new THREE.BoxGeometry(h2, h2, height);
 		const material = new THREE.RawShaderMaterial({
