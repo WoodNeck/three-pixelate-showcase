@@ -18,10 +18,10 @@ export default class GeometryScene extends Scene {
 		this._scene = new THREE.Scene();
 		this._scene.background = new THREE.TextureLoader().load("./textures/bgnd.png");
 
-		this._camera = new THREE.OrthographicCamera(0, 0, 0, 0, 0);
+		this._camera = new THREE.OrthographicCamera(0, 0, 0, 0, -1);
 		this._camera.rotateZ(-THREE.Math.DEG2RAD * 45);
 		this._camera.rotateX(THREE.Math.DEG2RAD * 60);
-		this._camera.position.z = 4;
+		this._camera.translateX(0);
 
 		this._renderTarget = new THREE.WebGLRenderTarget(0, 0);
 	}
@@ -33,12 +33,20 @@ export default class GeometryScene extends Scene {
 		const pixelRatio = window.devicePixelRatio;
 		const drawingW = width * pixelRatio;
 		const drawingH = height * pixelRatio;
-		const halfW = drawingW / pixelPerUnit * 0.5;
-		const halfH = drawingH / pixelPerUnit * 0.5;
+
+		// Width, Height of the render target
+		let rtW = Math.floor(drawingW / pixelPerUnit);
+		let rtH = Math.floor(drawingH / pixelPerUnit);
+		// Make sure they are multiple of 2
+		rtW -= rtW % 2;
+		rtH -= rtH % 2;
+
+		const halfW = rtW / 2;
+		const halfH = rtH / 2;
 
 		// Camera specs, in abs unit
 		// Left, right, top, bottom is in pixel unit
-		// abs unit achieved by zoom
+		// abs unit achieved by zoom value
 		camera.left = -halfW;
 		camera.right = halfW;
 		camera.top = halfH;
@@ -47,10 +55,7 @@ export default class GeometryScene extends Scene {
 		camera.zoom = pixelPerUnit;
 
 		// Render target, in abs unit
-		renderTarget.setSize(
-			drawingW / pixelPerUnit,
-			drawingH / pixelPerUnit,
-		);
+		renderTarget.setSize(rtW, rtH);
 
 		camera.updateProjectionMatrix();
 	}

@@ -18,9 +18,11 @@ export default class Tile implements Entity {
 			fragmentShader,
 		});
 		this._mesh = new THREE.Mesh(geometry, material);
-		this._mesh.translateX(h2 * x);
-		this._mesh.translateY(h2 * y);
-		this._mesh.translateZ(height * z);
+
+		const mesh = this._mesh;
+		mesh.translateX(h2 * x);
+		mesh.translateY(h2 * y);
+		mesh.translateZ(height * z);
 	}
 
 	public update(ms: number) {}
