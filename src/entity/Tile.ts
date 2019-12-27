@@ -3,16 +3,18 @@ import Entity from "./Entity";
 import vertexShader from "../shader/tile.vs";
 import fragmentShader from "../shader/tile.fs";
 
+const invSQRT3 = 1 / Math.sqrt(3);
+
 export default class Tile implements Entity {
 	private _mesh: THREE.Mesh;
 
 	public get mesh() { return this._mesh; }
 
 	constructor(x: number, y: number, z: number) {
-		const height = 1;
-		const h2 = height * 2 * Math.SQRT2;
+		const height = 2 * invSQRT3;
+		const width = 2 * Math.SQRT2;
 
-		const geometry = new THREE.BoxGeometry(h2, h2, height);
+		const geometry = new THREE.BoxGeometry(width, width, height);
 		const material = new THREE.RawShaderMaterial({
 			vertexShader,
 			fragmentShader,
@@ -20,8 +22,8 @@ export default class Tile implements Entity {
 		this._mesh = new THREE.Mesh(geometry, material);
 
 		const mesh = this._mesh;
-		mesh.translateX(h2 * x);
-		mesh.translateY(h2 * y);
+		mesh.translateX(width * x);
+		mesh.translateY(width * y);
 		mesh.translateZ(height * z);
 	}
 

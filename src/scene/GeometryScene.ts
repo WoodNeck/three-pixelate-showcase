@@ -18,9 +18,11 @@ export default class GeometryScene extends Scene {
 		this._scene = new THREE.Scene();
 		this._scene.background = new THREE.TextureLoader().load("./textures/bgnd.png");
 
-		this._camera = new THREE.OrthographicCamera(0, 0, 0, 0, -1);
+		this._camera = new THREE.OrthographicCamera(0, 0, 0, 0, -100);
 		this._camera.rotateZ(-THREE.Math.DEG2RAD * 45);
 		this._camera.rotateX(THREE.Math.DEG2RAD * 60);
+		// Give bias to make tile looks more pixel-art style
+		this._camera.position.z = 0.1;
 		this._camera.translateX(0);
 
 		this._renderTarget = new THREE.WebGLRenderTarget(0, 0);
