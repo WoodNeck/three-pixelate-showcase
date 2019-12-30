@@ -1,8 +1,9 @@
+#version 300 es
 precision highp float;
 
-uniform float time;
-varying vec2 vUv;
+in vec2 vUv;
+out vec4 col;
 
 void main() {
-	gl_FragColor = vec4(vUv, 0, 1);
+	col = vec4(vUv, 0, 1);
 }

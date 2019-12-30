@@ -9,9 +9,12 @@ export default class Renderer implements Resizeable, Updateable {
 	public get size() { return this._renderer.getDrawingBufferSize(new THREE.Vector2(0, 0)); }
 
 	constructor(canvasElem: HTMLCanvasElement) {
+		const ctx = canvasElem.getContext("webgl2");
+
 		this._renderer = new THREE.WebGLRenderer({
 			canvas: canvasElem,
 			antialias: true,
+			context: ctx as WebGLRenderingContext,
 		});
 	}
 

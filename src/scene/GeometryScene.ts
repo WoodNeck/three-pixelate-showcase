@@ -26,6 +26,8 @@ export default class GeometryScene extends Scene {
 		this._camera.translateX(0);
 
 		this._renderTarget = new THREE.WebGLRenderTarget(0, 0);
+		this._renderTarget.texture.magFilter = THREE.NearestFilter;
+		this._renderTarget.texture.minFilter = THREE.NearestFilter;
 	}
 
 	public resize(width: number, height: number) {
