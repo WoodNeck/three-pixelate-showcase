@@ -1,16 +1,15 @@
 import * as THREE from "three";
-import Scene from "./Scene";
+import Layer from "./Layer";
+import Tile from "../entity/Tile";
 
-export default class GeometryScene extends Scene {
+export default class PixelatedLayer extends Layer {
 	private _scene: THREE.Scene;
 	private _camera: THREE.OrthographicCamera;
-	private _renderTarget: THREE.WebGLRenderTarget;
 	private _pixelPerUnit: number = 8;
 
 	public get scene() { return this._scene; }
 	public get camera() { return this._camera; }
-	public get renderTarget() { return this._renderTarget; }
-	public get pixelateScale() { return this._pixelPerUnit; }
+	public get pixelPerUnit() { return this._pixelPerUnit; }
 
 	constructor() {
 		super();
@@ -25,15 +24,18 @@ export default class GeometryScene extends Scene {
 		this._camera.position.z = 0.1;
 		this._camera.translateX(0);
 
-		this._renderTarget = new THREE.WebGLRenderTarget(0, 0);
-		this._renderTarget.texture.magFilter = THREE.NearestFilter;
-		this._renderTarget.texture.minFilter = THREE.NearestFilter;
+		this._constructScene();
 	}
+
+	public update(ms: number) {
+		// this._camera.rotateOnWorldAxis(new THREE.Vector3(0, 0, 1), -THREE.Math.DEG2RAD * 1);
+	}
+
+	public updateScene(readTarget: THREE.WebGLRenderTarget) {}
 
 	public resize(width: number, height: number) {
 		const camera = this._camera;
 		const pixelPerUnit = this._pixelPerUnit;
-		const renderTarget = this._renderTarget;
 		const pixelRatio = window.devicePixelRatio;
 		const drawingW = width * pixelRatio;
 		const drawingH = height * pixelRatio;
@@ -58,13 +60,34 @@ export default class GeometryScene extends Scene {
 
 		camera.zoom = pixelPerUnit;
 
-		// Render target, in abs unit
-		renderTarget.setSize(rtW, rtH);
-
 		camera.updateProjectionMatrix();
 	}
 
-	public update(ms: number) {
-		// this._camera.rotateOnWorldAxis(new THREE.Vector3(0, 0, 1), -THREE.Math.DEG2RAD * 1);
+	private _constructScene() {
+		const tile = new Tile(3, -1, 1);
+		const tile2 = new Tile(2, -1, 0);
+		const tile3 = new Tile(2, -2, -1);
+		const tile4 = new Tile(3, -3, -1);
+		const tile5 = new Tile(3, -2, 0);
+		const tile6 = new Tile(4, -3, 0);
+		const tile7 = new Tile(4, -2, 1);
+		const tile8 = new Tile(-3, 4, 0);
+		const tile9 = new Tile(4, -4, 0);
+		const tile10 = new Tile(6, -5, 0);
+		const tile11 = new Tile(-4, 5, 0);
+		const tile12 = new Tile(-5, 6, 0);
+
+		this.add(tile);
+		this.add(tile2);
+		this.add(tile3);
+		this.add(tile4);
+		this.add(tile5);
+		this.add(tile6);
+		this.add(tile7);
+		this.add(tile8);
+		this.add(tile9);
+		this.add(tile10);
+		this.add(tile11);
+		this.add(tile12);
 	}
 }

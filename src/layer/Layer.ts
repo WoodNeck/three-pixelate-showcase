@@ -1,10 +1,9 @@
 import * as THREE from "three";
 import EntityManager from "../EntityManager";
 import Entity from "../entity/Entity";
-import Resizeable from "../interfaces/Resizable";
 import Updateable from "../interfaces/Updateable";
 
-export default abstract class Scene implements Resizeable, Updateable {
+export default abstract class Layer implements Updateable {
 	public abstract get scene(): Readonly<THREE.Scene>;
 	public abstract get camera(): Readonly<THREE.OrthographicCamera>;
 
@@ -31,4 +30,5 @@ export default abstract class Scene implements Resizeable, Updateable {
 	}
 
 	public abstract resize(width: number, height: number): void;
+	public abstract updateScene(readTarget: THREE.WebGLRenderTarget): void;
 }

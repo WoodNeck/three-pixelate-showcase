@@ -6,8 +6,10 @@ import fragmentShader from "../shader/tile.fs";
 const invSQRT3 = 1 / Math.sqrt(3);
 
 export default class Tile implements Entity {
+	private _material: THREE.Material;
 	private _mesh: THREE.Mesh;
 
+	public get material() { return this._material; }
 	public get mesh() { return this._mesh; }
 
 	constructor(x: number, y: number, z: number) {
@@ -15,11 +17,11 @@ export default class Tile implements Entity {
 		const width = 2 * Math.SQRT2;
 
 		const geometry = new THREE.BoxGeometry(width, width, height);
-		const material = new THREE.RawShaderMaterial({
+		this._material = new THREE.RawShaderMaterial({
 			vertexShader,
 			fragmentShader,
 		});
-		this._mesh = new THREE.Mesh(geometry, material);
+		this._mesh = new THREE.Mesh(geometry, this._material);
 
 		const mesh = this._mesh;
 		mesh.translateX(width * x);

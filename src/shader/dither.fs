@@ -16,8 +16,8 @@ float luma(vec3 color) {
   return dot(color, vec3(0.299, 0.587, 0.114));
 }
 
-float dither4x4(const vec2 position, float brightness) {
-  int x = int(mod(position.x, 4.0));
+float test_dither(vec2 position, float brightness) {
+	int x = int(mod(position.x, 4.0));
   int y = int(mod(position.y, 4.0));
   int index = x + y * 4;
 
@@ -26,10 +26,16 @@ float dither4x4(const vec2 position, float brightness) {
 	return step(brightness, limit);
 }
 
+vec4 dither4x4(vec2 position, float brightness, vec4 col1, vec4 col2) {
+	float dither = test_dither(position, brightness);
+	return mix(col1, col2, dither);
+}
+
 void main() {
 	vec4 col = texture(uTex, vUv);
-	col *= 64.;
+	col *= 32.;
 	col = floor(col + .5);
-	col /= 64.;
-	fragColor = col * dither4x4(gl_FragCoord.xy, luma(col.rgb));
+	col /= 32.;
+	fragColor = col;
+	// fragColor = col * dither4x4(gl_FragCoord.xy, luma(col.rgb));
 }
