@@ -10,11 +10,12 @@ out vec4 col;
 
 void main() {
 	vec4 texCol = texture(uTex, vUv);
-	float depth = .5 - texture(uDepthTex, vUv).x;
-	float depth2 = .5 - texture(uOutlineTex, vUv).x;
-	float s = step(0.01, depth - depth2);
-	col = texCol * (1. - s) + s * vec4(1, 1, 1, 1);
+	float belCol = texture(uDepthTex, vUv).r;
+	float belCol2 = texture(uDepthTex, vUv - vec2(0, 0.006)).r;
 
-	float diff = depth2 - depth;
-	col = vec4(depth, depth2, 0, 1);
+	float threshold = 0.0002;
+	float diff = belCol - belCol2;
+	float val = step(threshold, diff);
+
+	col = (1. - val) * texCol + val * vec4(1, 1, 1, 1);
 }

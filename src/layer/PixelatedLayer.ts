@@ -20,15 +20,13 @@ export default class PixelatedLayer extends Layer {
 		this._camera = new THREE.OrthographicCamera(0, 0, 0, 0, -100);
 		this._camera.rotateZ(-THREE.Math.DEG2RAD * 45);
 		this._camera.rotateX(THREE.Math.DEG2RAD * 60);
-		// Give bias to make tile looks more pixel-art style
-		this._camera.position.z = 0.1;
 		this._camera.translateX(0);
 
 		this._constructScene();
 	}
 
 	public update(ms: number) {
-		// this._camera.rotateOnWorldAxis(new THREE.Vector3(0, 0, 1), -THREE.Math.DEG2RAD * 1);
+		this._camera.rotateOnWorldAxis(new THREE.Vector3(0, 0, 1), -THREE.Math.DEG2RAD * 1);
 	}
 
 	public updateScene(readTarget: THREE.WebGLRenderTarget) {}
@@ -64,15 +62,15 @@ export default class PixelatedLayer extends Layer {
 	}
 
 	private _constructScene() {
-		const tile = new Tile(3, -1, 1);
-		const tile2 = new Tile(3, -4, 0);
-		const tile3 = new Tile(2, -2, -1);
-		const tile4 = new Tile(3, -3, -1);
+		const tile = new Tile(0, 0, 0);
+		const tile2 = new Tile(1, 0, 0);
+		const tile3 = new Tile(2, -2, 0);
+		const tile4 = new Tile(3, -1, 0);
 		const tile5 = new Tile(3, -2, 0);
 		const tile6 = new Tile(4, -3, 0);
 		const tile7 = new Tile(4, -2, 1);
 		const tile8 = new Tile(-3, 4, 0);
-		const tile9 = new Tile(3, -4, 1);
+		const tile9 = new Tile(3, -3, 1);
 		const tile10 = new Tile(6, -5, 0);
 		const tile11 = new Tile(-4, 5, 0);
 		const tile12 = new Tile(-5, 6, 0);
