@@ -93,3 +93,4 @@ typings/
 to-do.txt
 package-lock.json
 .DS_Store
+web/js/

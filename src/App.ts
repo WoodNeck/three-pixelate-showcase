@@ -31,7 +31,7 @@ class App {
 		const pixelatePass = new RenderPass(pixelLayer);
 		pixelatePass.renderToTexture = true;
 
-		const outlinePass = new OutlinePass();
+		const outlinePass = new OutlinePass(pixelLayer);
 		const renderPass = new RenderPass(foreLayer);
 
 		renderer.addPass(pixelatePass);

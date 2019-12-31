@@ -14,8 +14,8 @@ export default class RenderPass implements Pass {
 		this._shouldSwap = val;
 	}
 
-	constructor(scene: Layer) {
-		this._layer = scene;
+	constructor(layer: Layer) {
+		this._layer = layer;
 		this._renderToTexture = false;
 		this._shouldSwap = false;
 	}

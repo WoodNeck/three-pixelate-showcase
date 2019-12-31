@@ -19,7 +19,6 @@ export default class Renderer implements Updateable {
 			antialias: true,
 			context: ctx as WebGLRenderingContext,
 		});
-		this._renderer.autoClearDepth = false;
 
 		this._passes = [];
 
