@@ -4,7 +4,12 @@ The purpose of this showcase is to create hand-drawn style 3d-to-2d pixel art re
 
 I've used(or will use, as it isn't done yet) following techniques on this showcase.
 
-- Low resolution 2-pass rendering
-- Dithering post processing effect
+- Pixelation made with low-res rendering
+- Depth texture based 1px-outline on top
 
 Repo created with [three.ts-template](https://github.com/marquizzo/three.ts-template)
+
+## License
+Models I've used
+- Pidgeon 3 by tomkranis
+  - https://sketchfab.com/3d-models/pigeon-3-4383b3f88d9646c7b2f336266eaad947

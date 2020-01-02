@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import Layer from "./Layer";
 import Tile from "../entity/Tile";
 
@@ -22,11 +23,18 @@ export default class PixelatedLayer extends Layer {
 		this._camera.rotateX(THREE.Math.DEG2RAD * 60);
 		this._camera.translateX(0);
 
+		const light = new THREE.DirectionalLight(new THREE.Color("#fff"));
+
+		light.position.set( 0, 0, 1 );
+		light.lookAt(0, 0, 0);
+
+		this._scene.add(light);
+
 		this._constructScene();
 	}
 
 	public update(ms: number) {
-		this._camera.rotateOnWorldAxis(new THREE.Vector3(0, 0, 1), -THREE.Math.DEG2RAD * 1);
+		// this._camera.rotateOnWorldAxis(new THREE.Vector3(0, 0, 1), -THREE.Math.DEG2RAD * 1);
 	}
 
 	public updateScene(readTarget: THREE.WebGLRenderTarget) {}
@@ -87,5 +95,14 @@ export default class PixelatedLayer extends Layer {
 		this.add(tile10);
 		this.add(tile11);
 		this.add(tile12);
+
+		const loader = new GLTFLoader();
+
+		loader.load("./pidgeon.gltf", gltf => {
+			gltf.scene.rotateX(Math.PI / 2);
+			this._scene.add( gltf.scene );
+		}, undefined, error => {
+			console.error( error );
+		} );
 	}
 }
