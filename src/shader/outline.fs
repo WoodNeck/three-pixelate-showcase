@@ -3,19 +3,25 @@ precision highp float;
 
 uniform sampler2D uTex;
 uniform sampler2D uDepthTex;
-uniform sampler2D uOutlineTex;
+uniform vec2 uTexSize;
 
 in vec2 vUv;
 out vec4 col;
 
 void main() {
-	vec4 texCol = texture(uTex, vUv);
-	float belCol = texture(uDepthTex, vUv).r;
-	float belCol2 = texture(uDepthTex, vUv - vec2(0, 0.006)).r;
+	vec2 btmPxl = vec2(gl_FragCoord.x, gl_FragCoord.y - 1.);
+	vec2 uv = gl_FragCoord.xy / uTexSize.xy;
+	vec2 bUv = btmPxl / uTexSize.xy;
 
-	float threshold = 0.0002;
+	vec4 texCol = texture(uTex, uv);
+	float belCol = texture(uDepthTex, uv).r;
+	float belCol2 = texture(uDepthTex, bUv).r;
+
+	float threshold = 0.16137430609 / 1000.; // sqrt(5/3) / 8 * (1000(Far), as camera is at 0)
 	float diff = belCol - belCol2;
 	float val = step(threshold, diff);
 
-	col = (1. - val) * texCol + val * vec4(1, 1, 1, 1);
+	vec4 outlineCol = vec4(1, 1, 1, 1);
+
+	col = (1. - val) * texCol + val * outlineCol;
 }
