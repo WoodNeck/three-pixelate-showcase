@@ -34,7 +34,7 @@ vec4 dither4x4(vec2 position, float brightness, vec4 col1, vec4 col2) {
 void main() {
 	vec4 col = texture(uTex, vUv);
 	col *= 32.;
-	col = floor(col + .5);
+	col = floor(col);
 	col /= 32.;
 	fragColor = col;
 	// fragColor = col * dither4x4(gl_FragCoord.xy, luma(col.rgb));

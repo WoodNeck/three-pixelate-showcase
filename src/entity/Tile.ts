@@ -15,16 +15,13 @@ export default class Tile implements Entity {
 	constructor(x: number, y: number, z: number) {
 		const height = 2 * invSQRT3;
 		const width = 2 * Math.SQRT2;
-		const depth = x + y + z;
 
 		const geometry = new THREE.BoxGeometry(width, width, height);
 
-		this._material = new THREE.RawShaderMaterial({
-			uniforms: {
-				uDepth: { value: depth },
-			},
-			vertexShader,
-			fragmentShader,
+		this._material = new THREE.MeshPhongMaterial({
+			map: new THREE.TextureLoader().load("./textures/stone_albedo.jpg"),
+			aoMap: new THREE.TextureLoader().load("./textures/stone_ao.jpg"),
+			normalMap: new THREE.TextureLoader().load("./textures/stone_normal.jpg"),
 		});
 		this._mesh = new THREE.Mesh(geometry, this._material);
 

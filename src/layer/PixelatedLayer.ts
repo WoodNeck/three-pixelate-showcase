@@ -2,6 +2,8 @@ import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import Layer from "./Layer";
 import Tile from "../entity/Tile";
+import cellVS from "../shader/cell.vs";
+import cellFS from "../shader/cell.fs";
 
 export default class PixelatedLayer extends Layer {
 	private _scene: THREE.Scene;
@@ -18,14 +20,14 @@ export default class PixelatedLayer extends Layer {
 		this._scene = new THREE.Scene();
 		this._scene.background = new THREE.TextureLoader().load("./textures/bgnd.png");
 
-		this._camera = new THREE.OrthographicCamera(0, 0, 0, 0, -1000, 1000);
+		this._camera = new THREE.OrthographicCamera(0, 0, 0, 0, -30, 30);
 		this._camera.rotateZ(-THREE.Math.DEG2RAD * 45);
 		this._camera.rotateX(THREE.Math.DEG2RAD * 60);
 		this._camera.translateX(0);
 
-		const light = new THREE.DirectionalLight(new THREE.Color("#fff"));
+		const light = new THREE.DirectionalLight(new THREE.Color("#fff"), 3);
 
-		light.position.set( 0, 0, 1 );
+		light.position.set( 1, -1, 1 );
 		light.lookAt(0, 0, 0);
 
 		this._scene.add(light);
@@ -95,6 +97,16 @@ export default class PixelatedLayer extends Layer {
 		this.add(tile10);
 		this.add(tile11);
 		this.add(tile12);
+
+		const geometry = new THREE.TorusKnotGeometry(3);
+		const material = new THREE.RawShaderMaterial({
+			vertexShader: cellVS,
+			fragmentShader: cellFS,
+		});
+		const mesh = new THREE.Mesh(geometry, material);
+		mesh.translateY(-20);
+		mesh.rotateZ(5);
+		this._scene.add(mesh);
 
 		const loader = new GLTFLoader();
 

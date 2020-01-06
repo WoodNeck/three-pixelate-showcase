@@ -10,6 +10,8 @@ I've used(or will use, as it isn't done yet) following techniques on this showca
 Repo created with [three.ts-template](https://github.com/marquizzo/three.ts-template)
 
 ## License
-Models I've used
+Model / Textures I've used
 - Pidgeon 3 by tomkranis
   - https://sketchfab.com/3d-models/pigeon-3-4383b3f88d9646c7b2f336266eaad947
+- Stone wall 005 by Joao Paulo
+  - https://3dtextures.me/2018/01/22/stone-wall-005/
