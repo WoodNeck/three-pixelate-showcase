@@ -36,13 +36,12 @@ vec4 getOutlineCol() {
 
 vec4 palette(vec4 col) {
 	vec3 mappedColors = floor(col.rgb * 15.);
-	float mappedI = mappedColors.r + mappedColors.g * 16. + mappedColors.b * 16. * 16.;
+	float mappedI = mappedColors.r * 256. + mappedColors.g * 16. + mappedColors.b;
 
-	return texture(uPaletteTex, floor(vec2(mappedI / 64., mod(mappedI, 64.))) / 64., col.a);
+	return texture(uPaletteTex, vec2(mod(mappedI, 64.), mappedI / 64.) / 64., col.a);
 }
 
 void main() {
 	vec4 albedo = getOutlineCol();
 	fragColor = palette(albedo);
-	// fragColor = albedo;
 }

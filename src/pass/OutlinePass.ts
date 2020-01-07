@@ -3,6 +3,7 @@ import Pass from "./Pass";
 import EffectPlane from "../entity/EffectPlane";
 import outlineVS from "../shader/outline.vs";
 import outlineFS from "../shader/outline.fs";
+import PaletteTexture from "../palette/PaletteTexture";
 
 export default class OutlinePass implements Pass {
 	public readonly shouldSwap = true;
@@ -12,6 +13,12 @@ export default class OutlinePass implements Pass {
 	private _camera: THREE.OrthographicCamera;
 
 	constructor() {
+		this._scene = new THREE.Scene();
+
+		this._camera = new THREE.OrthographicCamera(-0.5, 0.5, 0.5, -0.5);
+		this._camera.position.z = 5;
+		this._camera.updateProjectionMatrix();
+
 		this._effectPlane = new EffectPlane({
 			uTex: new THREE.Uniform(0),
 			uDepthTex: new THREE.Uniform(0),
@@ -19,22 +26,11 @@ export default class OutlinePass implements Pass {
 			uInvTexSize: new THREE.Vector2(1, 1),
 		}, outlineVS, outlineFS);
 
-		this._scene = new THREE.Scene();
-
-		this._camera = new THREE.OrthographicCamera(-0.5, 0.5, 0.5, -0.5);
-		this._camera.position.z = 5;
-		this._camera.updateProjectionMatrix();
-
 		this._scene.add(this._effectPlane.mesh);
 
 		// Load palette texture
 		const uniforms = this._effectPlane.material.uniforms;
-		uniforms.uPaletteTex.value = new THREE.TextureLoader().load("./textures/palette.png", texture => {
-			texture.magFilter = THREE.NearestFilter;
-			texture.minFilter = THREE.NearestFilter;
-			texture.flipY = false;
-			texture.generateMipmaps = false;
-		});
+		uniforms.uPaletteTex.value = PaletteTexture.generate();
 	}
 
 	public render(renderer: THREE.WebGLRenderer, writeTarget: THREE.WebGLRenderTarget, readTarget: THREE.WebGLRenderTarget) {
