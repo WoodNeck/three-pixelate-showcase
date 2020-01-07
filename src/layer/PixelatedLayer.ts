@@ -36,7 +36,7 @@ export default class PixelatedLayer extends Layer {
 	}
 
 	public update(ms: number) {
-		// this._camera.rotateOnWorldAxis(new THREE.Vector3(0, 0, 1), -THREE.Math.DEG2RAD * 1);
+		this._camera.rotateOnWorldAxis(new THREE.Vector3(0, 0, 1), -THREE.Math.DEG2RAD * 1);
 	}
 
 	public updateScene(readTarget: THREE.WebGLRenderTarget) {}
@@ -104,7 +104,7 @@ export default class PixelatedLayer extends Layer {
 			fragmentShader: cellFS,
 		});
 		const mesh = new THREE.Mesh(geometry, material);
-		mesh.translateY(-20);
+		mesh.translateY(-10);
 		mesh.rotateZ(5);
 		this._scene.add(mesh);
 

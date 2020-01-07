@@ -3,7 +3,6 @@ import Pass from "./Pass";
 import EffectPlane from "../entity/EffectPlane";
 import outlineVS from "../shader/outline.vs";
 import outlineFS from "../shader/outline.fs";
-import Layer from "src/layer/Layer";
 
 export default class OutlinePass implements Pass {
 	public readonly shouldSwap = true;
@@ -16,7 +15,8 @@ export default class OutlinePass implements Pass {
 		this._effectPlane = new EffectPlane({
 			uTex: new THREE.Uniform(0),
 			uDepthTex: new THREE.Uniform(0),
-			uTexSize: new THREE.Vector2(1, 1),
+			uPaletteTex: new THREE.Uniform(0),
+			uInvTexSize: new THREE.Vector2(1, 1),
 		}, outlineVS, outlineFS);
 
 		this._scene = new THREE.Scene();
@@ -26,13 +26,22 @@ export default class OutlinePass implements Pass {
 		this._camera.updateProjectionMatrix();
 
 		this._scene.add(this._effectPlane.mesh);
+
+		// Load palette texture
+		const uniforms = this._effectPlane.material.uniforms;
+		uniforms.uPaletteTex.value = new THREE.TextureLoader().load("./textures/palette.png", texture => {
+			texture.magFilter = THREE.NearestFilter;
+			texture.minFilter = THREE.NearestFilter;
+			texture.flipY = false;
+			texture.generateMipmaps = false;
+		});
 	}
 
 	public render(renderer: THREE.WebGLRenderer, writeTarget: THREE.WebGLRenderTarget, readTarget: THREE.WebGLRenderTarget) {
 		const uniforms = this._effectPlane.material.uniforms;
 		uniforms.uTex.value = readTarget.texture;
 		uniforms.uDepthTex.value = readTarget.depthTexture;
-		uniforms.uTexSize.value = new THREE.Vector2(readTarget.width, readTarget.height);
+		uniforms.uInvTexSize.value = new THREE.Vector2(1 / readTarget.width, 1 / readTarget.height);
 
 		renderer.setRenderTarget(writeTarget);
 		renderer.render(this._scene, this._camera);

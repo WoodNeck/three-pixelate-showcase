@@ -20,8 +20,8 @@ export default class Tile implements Entity {
 
 		this._material = new THREE.MeshPhongMaterial({
 			map: new THREE.TextureLoader().load("./textures/stone_albedo.jpg"),
-			aoMap: new THREE.TextureLoader().load("./textures/stone_ao.jpg"),
-			normalMap: new THREE.TextureLoader().load("./textures/stone_normal.jpg"),
+			// aoMap: new THREE.TextureLoader().load("./textures/stone_ao.jpg"),
+			// normalMap: new THREE.TextureLoader().load("./textures/stone_normal.jpg"),
 		});
 		this._mesh = new THREE.Mesh(geometry, this._material);
 

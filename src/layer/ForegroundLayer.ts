@@ -21,7 +21,10 @@ export default class ForegroundLayer extends Layer {
 		this._camera.position.z = 5;
 		this._camera.updateProjectionMatrix();
 
-		this._effectPlane = new EffectPlane({uTex: new THREE.Uniform(0)}, ditherVS, ditherFS);
+		this._effectPlane = new EffectPlane({
+			uTex: new THREE.Uniform(0),
+		}, ditherVS, ditherFS);
+
 		this._scene.add(this._effectPlane.mesh);
 	}
 

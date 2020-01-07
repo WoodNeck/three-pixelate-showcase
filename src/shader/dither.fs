@@ -2,6 +2,7 @@
 precision highp float;
 
 uniform sampler2D uTex;
+uniform sampler2D uPaletteTex;
 const float[16] threshold = float[16](
 	1./16., 9./16., 3./16., 11./16.,
 	13./16., 5./16., 15./16., 7./16.,
@@ -33,9 +34,6 @@ vec4 dither4x4(vec2 position, float brightness, vec4 col1, vec4 col2) {
 
 void main() {
 	vec4 col = texture(uTex, vUv);
-	col *= 32.;
-	col = floor(col);
-	col /= 32.;
 	fragColor = col;
 	// fragColor = col * dither4x4(gl_FragCoord.xy, luma(col.rgb));
 }
