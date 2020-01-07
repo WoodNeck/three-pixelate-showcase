@@ -3,7 +3,7 @@ import Pass from "./Pass";
 import EffectPlane from "../entity/EffectPlane";
 import outlineVS from "../shader/outline.vs";
 import outlineFS from "../shader/outline.fs";
-import PaletteTexture from "../palette/PaletteTexture";
+import Palette from "../palette/Palette";
 
 export default class OutlinePass implements Pass {
 	public readonly shouldSwap = true;
@@ -23,14 +23,18 @@ export default class OutlinePass implements Pass {
 			uTex: new THREE.Uniform(0),
 			uDepthTex: new THREE.Uniform(0),
 			uPaletteTex: new THREE.Uniform(0),
+			uDitherTex: new THREE.Uniform(0),
 			uInvTexSize: new THREE.Vector2(1, 1),
 		}, outlineVS, outlineFS);
 
 		this._scene.add(this._effectPlane.mesh);
 
 		// Load palette texture
+		const palette = new Palette();
 		const uniforms = this._effectPlane.material.uniforms;
-		uniforms.uPaletteTex.value = PaletteTexture.generate();
+
+		uniforms.uPaletteTex.value = palette.texture;
+		uniforms.uDitherTex.value = palette.ditherTexture;
 	}
 
 	public render(renderer: THREE.WebGLRenderer, writeTarget: THREE.WebGLRenderTarget, readTarget: THREE.WebGLRenderTarget) {
