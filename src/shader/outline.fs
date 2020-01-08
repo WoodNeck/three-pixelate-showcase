@@ -40,7 +40,7 @@ vec4 getOutlineCol(vec4 texCol) {
 	float val2 = step(threshold, diff2);
 	float isOutline = val * (1. - val2);
 
-	vec4 outlineCol = vec4(1, 1, 1, 1);
+	vec4 outlineCol = texture(uPaletteTex, vec2(1, 1));
 
 	return (1. - isOutline) * texCol + isOutline * outlineCol;
 }
@@ -53,9 +53,7 @@ vec2 getPaletteUV(vec4 col) {
 
 void main() {
 	vec2 uv = gl_FragCoord.xy * uInvTexSize;
-	vec4 texCol = texture(uTex, uv);
-
-	vec4 albedo = getOutlineCol(texCol);
+	vec4 albedo = texture(uTex, uv);
 	vec2 pUV = getPaletteUV(albedo);
 
 	vec4 nearest = texture(uPaletteTex, pUV);
@@ -64,8 +62,9 @@ void main() {
 	int x = int(gl_FragCoord.x) % 4;
 	int y = int(gl_FragCoord.y) % 4;
 
-	float diff = length(texCol - nearest);
+	float diff = length(albedo - nearest);
 	float sw = findClosest(x, y, diff);
 
-	fragColor = sw * second + (1. - sw) * nearest;
+	vec4 dithered = sw * second + (1. - sw) * nearest;
+	fragColor = getOutlineCol(dithered);
 }
