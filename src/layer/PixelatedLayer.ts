@@ -18,7 +18,8 @@ export default class PixelatedLayer extends Layer {
 		super();
 
 		this._scene = new THREE.Scene();
-		this._scene.background = new THREE.TextureLoader().load("./textures/bgnd.png");
+		// this._scene.background = new THREE.TextureLoader().load("./textures/bgnd.png");
+		this._scene.background = new THREE.Color("#1a1c2c");
 
 		this._camera = new THREE.OrthographicCamera(0, 0, 0, 0, -30, 30);
 		this._camera.rotateZ(-THREE.Math.DEG2RAD * 45);
@@ -36,7 +37,7 @@ export default class PixelatedLayer extends Layer {
 	}
 
 	public update(ms: number) {
-		// this._camera.rotateOnWorldAxis(new THREE.Vector3(0, 0, 1), -THREE.Math.DEG2RAD * 1);
+		this._camera.rotateOnWorldAxis(new THREE.Vector3(0, 0, 1), -THREE.Math.DEG2RAD * 1);
 	}
 
 	public updateScene(readTarget: THREE.WebGLRenderTarget) {}
