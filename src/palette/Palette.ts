@@ -6,18 +6,15 @@ type Vec3 = [number, number, number];
 
 export default class Palette {
 	private _texture: THREE.DataTexture;
-	private _ditherTexture: THREE.DataTexture;
 
 	public get texture() { return this._texture; }
-	public get ditherTexture() { return this._ditherTexture; }
 
 	constructor() {
 		const texWidth = 64;
 		const texSize = texWidth * texWidth;
 		const colorData = new Uint8Array(3 * texSize);
-		const secondColorData = new Uint8Array(3 * texSize);
 
-		const palette: Vec3[] = COLORS.SWEETIE16.map(col => {
+		const palette: Vec3[] = COLORS.ICE_CREAM_GB.map(col => {
 			col = col.startsWith("#")
 				? col.substr(1)
 				: col;
@@ -39,23 +36,6 @@ export default class Palette {
 			const b = col1[2] - col2[2];
 			return r * r + g * g + b * b;
 		};
-
-		const secondClosestIndex = palette.map((col, curIdx) => {
-			let closestIdx = 0;
-			let closestDist = Infinity;
-
-			palette.forEach((otherCol, otherIdx) => {
-				if (otherIdx === curIdx) return;
-
-				const dist = diff(col, otherCol);
-				if (dist < closestDist) {
-					closestDist = dist;
-					closestIdx = otherIdx;
-				}
-			});
-
-			return closestIdx;
-		});
 
 		const rgbOffset = 16;
 		const rgbOffsetSquare = rgbOffset * rgbOffset;
@@ -79,19 +59,14 @@ export default class Palette {
 			}
 
 			const closestColor = palette[closestIndex];
-			const secondColor = palette[secondClosestIndex[closestIndex]];
 			const dataIndex = 3 * colorVal;
 
 			colorData[dataIndex + 0] = closestColor[0]; // R;
 			colorData[dataIndex + 1] = closestColor[1]; // G;
 			colorData[dataIndex + 2] = closestColor[2]; // B;
-			secondColorData[dataIndex + 0] = secondColor[0]; // R;
-			secondColorData[dataIndex + 1] = secondColor[1]; // G;
-			secondColorData[dataIndex + 2] = secondColor[2]; // B;
 		}
 
 		const texture = new THREE.DataTexture(colorData, texWidth, texWidth, THREE.RGBFormat);
-		const ditherTexture = new THREE.DataTexture(secondColorData, texWidth, texWidth, THREE.RGBFormat);
 
 		texture.flipY = false;
 		texture.magFilter = THREE.NearestFilter;
@@ -99,13 +74,6 @@ export default class Palette {
 		texture.generateMipmaps = false;
 		texture.needsUpdate = true;
 
-		ditherTexture.flipY = false;
-		ditherTexture.magFilter = THREE.NearestFilter;
-		ditherTexture.minFilter = THREE.NearestFilter;
-		ditherTexture.generateMipmaps = false;
-		ditherTexture.needsUpdate = true;
-
 		this._texture = texture;
-		this._ditherTexture = ditherTexture;
 	}
 }

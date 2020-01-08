@@ -4,22 +4,17 @@ precision highp float;
 uniform sampler2D uTex;
 uniform sampler2D uDepthTex;
 uniform sampler2D uPaletteTex;
-uniform sampler2D uDitherTex;
 uniform vec2 uInvTexSize;
 
-const float threshold[16] = float[16](
-	1./16., 9./16., 3./16., 11./16.,
-	13./16., 5./16., 15./16., 7./16.,
-	4./16., 12./16., 2./16., 10./16.,
-	16./16., 8./16., 14./16., 6./16.
+const float bayer[16] = float[16](
+	 1.,  9.,  3., 11.,
+	13.,  5., 15.,  7.,
+	 4., 12.,  2., 10.,
+	16.,  8., 14.,  6.
 );
 
 in vec2 vUv;
 out vec4 fragColor;
-
-float findClosest(int x, int y, float v) {
-	return step(threshold[4*y+x],v);
-}
 
 vec4 getOutlineCol(vec4 texCol) {
 	vec2 topPxl = gl_FragCoord.xy + vec2(0, 1);
@@ -54,17 +49,13 @@ vec2 getPaletteUV(vec4 col) {
 void main() {
 	vec2 uv = gl_FragCoord.xy * uInvTexSize;
 	vec4 albedo = texture(uTex, uv);
-	vec2 pUV = getPaletteUV(albedo);
-
-	vec4 nearest = texture(uPaletteTex, pUV);
-	vec4 second = texture(uDitherTex, pUV);
 
 	int x = int(gl_FragCoord.x) % 4;
 	int y = int(gl_FragCoord.y) % 4;
 
-	float diff = length(albedo - nearest);
-	float sw = findClosest(x, y, diff);
+	vec4 albedo_with_offset = albedo + (bayer[4*y+x] / 255.);
 
-	vec4 dithered = sw * second + (1. - sw) * nearest;
-	fragColor = getOutlineCol(dithered);
+	vec2 pUV = getPaletteUV(albedo_with_offset);
+	vec4 restricted = texture(uPaletteTex, pUV);
+	fragColor = getOutlineCol(restricted);
 }

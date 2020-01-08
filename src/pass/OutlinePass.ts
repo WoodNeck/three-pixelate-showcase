@@ -23,7 +23,6 @@ export default class OutlinePass implements Pass {
 			uTex: new THREE.Uniform(0),
 			uDepthTex: new THREE.Uniform(0),
 			uPaletteTex: new THREE.Uniform(0),
-			uDitherTex: new THREE.Uniform(0),
 			uInvTexSize: new THREE.Vector2(1, 1),
 		}, outlineVS, outlineFS);
 
@@ -34,7 +33,6 @@ export default class OutlinePass implements Pass {
 		const uniforms = this._effectPlane.material.uniforms;
 
 		uniforms.uPaletteTex.value = palette.texture;
-		uniforms.uDitherTex.value = palette.ditherTexture;
 	}
 
 	public render(renderer: THREE.WebGLRenderer, writeTarget: THREE.WebGLRenderTarget, readTarget: THREE.WebGLRenderTarget) {
