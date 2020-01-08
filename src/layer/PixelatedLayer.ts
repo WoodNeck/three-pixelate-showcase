@@ -18,7 +18,6 @@ export default class PixelatedLayer extends Layer {
 		super();
 
 		this._scene = new THREE.Scene();
-		// this._scene.background = new THREE.TextureLoader().load("./textures/bgnd.png");
 		this._scene.background = new THREE.Color("#1a1c2c");
 
 		this._camera = new THREE.OrthographicCamera(0, 0, 0, 0, -30, 30);

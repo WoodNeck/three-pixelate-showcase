@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import COLORS from "./colors";
+import * as COLORS from "./colors";
 import { range } from "../util";
 
 type Vec3 = [number, number, number];
@@ -17,7 +17,7 @@ export default class Palette {
 		const colorData = new Uint8Array(3 * texSize);
 		const secondColorData = new Uint8Array(3 * texSize);
 
-		const palette: Vec3[] = COLORS.map(col => {
+		const palette: Vec3[] = COLORS.SWEETIE16.map(col => {
 			col = col.startsWith("#")
 				? col.substr(1)
 				: col;
