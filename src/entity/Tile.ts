@@ -16,12 +16,24 @@ export default class Tile implements Entity {
 		const height = 2 * invSQRT3;
 		const width = 2 * Math.SQRT2;
 
-		const geometry = new THREE.BoxGeometry(width, width, height);
+		const geometry = new THREE.BoxGeometry(width, width, height, 30, 30, 30);
 
 		this._material = new THREE.MeshPhongMaterial({
-			map: new THREE.TextureLoader().load("./textures/stone_albedo.jpg"),
-			// aoMap: new THREE.TextureLoader().load("./textures/stone_ao.jpg"),
-			// normalMap: new THREE.TextureLoader().load("./textures/stone_normal.jpg"),
+			map: new THREE.TextureLoader().load("./textures/stone_albedo.jpg", tex => {
+				tex.minFilter = THREE.NearestFilter;
+				tex.magFilter = THREE.NearestFilter;
+				tex.generateMipmaps = false;
+			}),
+			aoMap: new THREE.TextureLoader().load("./textures/stone_ao.jpg", tex => {
+				tex.minFilter = THREE.NearestFilter;
+				tex.magFilter = THREE.NearestFilter;
+				tex.generateMipmaps = false;
+			}),
+			// normalMap: new THREE.TextureLoader().load("./textures/stone_normal.jpg", tex => {
+			// 	tex.minFilter = THREE.NearestFilter;
+			// 	tex.magFilter = THREE.NearestFilter;
+			// 	tex.generateMipmaps = false;
+			// }),
 		});
 		this._mesh = new THREE.Mesh(geometry, this._material);
 

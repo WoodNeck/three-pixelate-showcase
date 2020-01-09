@@ -145,3 +145,11 @@ export const NES = [
 	"#f8d8f8",
 	"#787878",
 ];
+
+// https://lospec.com/palette-list/nintendo-super-gameboy
+export const SUPER_GAMEBOY = [
+	"#331e50",
+	"#a63725",
+	"#d68e49",
+	"#f7e7c6",
+];

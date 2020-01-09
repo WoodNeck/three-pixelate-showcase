@@ -8,6 +8,7 @@ import cellFS from "../shader/cell.fs";
 export default class PixelatedLayer extends Layer {
 	private _scene: THREE.Scene;
 	private _camera: THREE.OrthographicCamera;
+	private _sun: THREE.DirectionalLight;
 	private _pixelPerUnit: number = 8;
 
 	public get scene() { return this._scene; }
@@ -25,18 +26,21 @@ export default class PixelatedLayer extends Layer {
 		this._camera.rotateX(THREE.Math.DEG2RAD * 60);
 		this._camera.translateX(0);
 
-		const light = new THREE.DirectionalLight(new THREE.Color("#fff"), 3);
+		this._sun = new THREE.DirectionalLight(new THREE.Color("#fff"), 3);
 
-		light.position.set( 1, -1, 1 );
-		light.lookAt(0, 0, 0);
+		this._sun.position.set(3, 0, 3);
+		this._sun.lookAt(0, 0, 0);
 
-		this._scene.add(light);
+		this._scene.add(this._sun);
 
 		this._constructScene();
 	}
 
 	public update(ms: number) {
-		this._camera.rotateOnWorldAxis(new THREE.Vector3(0, 0, 1), -THREE.Math.DEG2RAD * 1);
+		const theta = -THREE.Math.DEG2RAD * ms / 50;
+		this._sun.position.set(3 * Math.cos(theta), 3 * Math.sin(theta), 3);
+		this._sun.lookAt(0, 0, 0);
+		// this._camera.rotateOnWorldAxis(new THREE.Vector3(0, 0, 1), -THREE.Math.DEG2RAD * 1);
 	}
 
 	public updateScene(readTarget: THREE.WebGLRenderTarget) {}

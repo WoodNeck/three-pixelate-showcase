@@ -21,10 +21,11 @@ Model / Textures I've used
 - Stone wall 005 by Joao Paulo
   - https://3dtextures.me/2018/01/22/stone-wall-005/
 
-Palette textures generated from
+Palette textures are generated from the following palettes
 - https://lospec.com/palette-list/sweetie-16
 - https://lospec.com/palette-list/endesga-16
 - https://lospec.com/palette-list/ice-cream-gb
 - https://lospec.com/palette-list/indecision
 - https://lospec.com/palette-list/island-joy-16
 - https://lospec.com/palette-list/nintendo-entertainment-system
+- https://lospec.com/palette-list/nintendo-super-gameboy
