@@ -3,7 +3,8 @@ import Pass from "./Pass";
 import EffectPlane from "../entity/EffectPlane";
 import outlineVS from "../shader/outline.vs";
 import outlineFS from "../shader/outline.fs";
-import Palette from "../palette/Palette";
+import PaletteTexture from "../palette/PaletteTexture";
+import * as COLORS from "../palette/colors";
 
 export default class OutlinePass implements Pass {
 	public readonly shouldSwap = true;
@@ -29,10 +30,9 @@ export default class OutlinePass implements Pass {
 		this._scene.add(this._effectPlane.mesh);
 
 		// Load palette texture
-		const palette = new Palette();
 		const uniforms = this._effectPlane.material.uniforms;
 
-		uniforms.uPaletteTex.value = palette.texture;
+		uniforms.uPaletteTex.value = PaletteTexture.get(COLORS.ICE_CREAM_GB);
 	}
 
 	public render(renderer: THREE.WebGLRenderer, writeTarget: THREE.WebGLRenderTarget, readTarget: THREE.WebGLRenderTarget) {

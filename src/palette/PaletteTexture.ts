@@ -1,20 +1,27 @@
 import * as THREE from "three";
-import * as COLORS from "./colors";
 import { range } from "../util";
+import { Palette, Vec3 } from "../type";
 
-type Vec3 = [number, number, number];
+const textures: Map<string, THREE.DataTexture> = new Map();
 
-export default class Palette {
-	private _texture: THREE.DataTexture;
+// Singleton
+export default class PaletteTexture {
+	public static get(palette: Palette) {
+		if (textures.has(palette.name)) {
+			return textures.get(palette.name);
+		} else {
+			const newTex = PaletteTexture._generateFrom(palette);
+			textures.set(palette.name, newTex);
+			return newTex;
+		}
+	}
 
-	public get texture() { return this._texture; }
-
-	constructor() {
+	private static _generateFrom(palette: Palette): THREE.DataTexture {
 		const texWidth = 64;
 		const texSize = texWidth * texWidth;
 		const colorData = new Uint8Array(3 * texSize);
 
-		const palette: Vec3[] = COLORS.ICE_CREAM_GB.map(col => {
+		const colors: Vec3[] = palette.colors.map(col => {
 			col = col.startsWith("#")
 				? col.substr(1)
 				: col;
@@ -49,8 +56,8 @@ export default class Palette {
 			let closestIndex = 0;
 			let closestDist = Infinity;
 
-			for (const paletteIndex of range(palette.length)) {
-				const colorDiff = diff(color, palette[paletteIndex]);
+			for (const paletteIndex of range(colors.length)) {
+				const colorDiff = diff(color, colors[paletteIndex]);
 
 				if (colorDiff < closestDist) {
 					closestIndex = paletteIndex;
@@ -58,7 +65,7 @@ export default class Palette {
 				}
 			}
 
-			const closestColor = palette[closestIndex];
+			const closestColor = colors[closestIndex];
 			const dataIndex = 3 * colorVal;
 
 			colorData[dataIndex + 0] = closestColor[0]; // R;
@@ -74,6 +81,6 @@ export default class Palette {
 		texture.generateMipmaps = false;
 		texture.needsUpdate = true;
 
-		this._texture = texture;
+		return texture;
 	}
 }

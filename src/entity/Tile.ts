@@ -18,7 +18,7 @@ export default class Tile implements Entity {
 
 		const geometry = new THREE.BoxGeometry(width, width, height, 30, 30, 30);
 
-		this._material = new THREE.MeshPhongMaterial({
+		this._material = new THREE.MeshLambertMaterial({
 			map: new THREE.TextureLoader().load("./textures/stone_albedo.jpg", tex => {
 				tex.minFilter = THREE.NearestFilter;
 				tex.magFilter = THREE.NearestFilter;

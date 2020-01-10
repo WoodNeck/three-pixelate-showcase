@@ -26,10 +26,12 @@ export default class PixelatedLayer extends Layer {
 		this._camera.rotateX(THREE.Math.DEG2RAD * 60);
 		this._camera.translateX(0);
 
-		this._sun = new THREE.DirectionalLight(new THREE.Color("#fff"), 3);
+		this._sun = new THREE.DirectionalLight(new THREE.Color("#fff"), 2);
 
 		this._sun.position.set(3, 0, 3);
 		this._sun.lookAt(0, 0, 0);
+
+		this._scene.add(new THREE.AmbientLight("#fff", 1));
 
 		this._scene.add(this._sun);
 
@@ -86,7 +88,7 @@ export default class PixelatedLayer extends Layer {
 		const tile8 = new Tile(-3, 4, 0);
 		const tile9 = new Tile(3, -3, 1);
 		const tile10 = new Tile(6, -5, 0);
-		const tile11 = new Tile(-4, 5, 0);
+		const tile11 = new Tile(3, -3, 0);
 		const tile12 = new Tile(-5, 6, 0);
 
 		this.add(tile);
