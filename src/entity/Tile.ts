@@ -1,7 +1,10 @@
 import * as THREE from "three";
 import Entity from "./Entity";
-import vertexShader from "../shader/tile.vs";
+import vertexTopShader from "../shader/tile-top.vs";
+import vertexSideShader from "../shader/tile-side.vs";
 import fragmentShader from "../shader/tile.fs";
+import PaletteTexture from "../palette/PaletteTexture";
+import * as COLORS from "../palette/colors";
 
 const invSQRT3 = 1 / Math.sqrt(3);
 
@@ -17,25 +20,29 @@ export default class Tile implements Entity {
 		const width = 2 * Math.SQRT2;
 
 		const geometry = new THREE.BoxGeometry(width, width, height, 30, 30, 30);
-
-		this._material = new THREE.MeshLambertMaterial({
-			map: new THREE.TextureLoader().load("./textures/stone_albedo.jpg", tex => {
-				tex.minFilter = THREE.NearestFilter;
-				tex.magFilter = THREE.NearestFilter;
-				tex.generateMipmaps = false;
-			}),
-			aoMap: new THREE.TextureLoader().load("./textures/stone_ao.jpg", tex => {
-				tex.minFilter = THREE.NearestFilter;
-				tex.magFilter = THREE.NearestFilter;
-				tex.generateMipmaps = false;
-			}),
-			// normalMap: new THREE.TextureLoader().load("./textures/stone_normal.jpg", tex => {
-			// 	tex.minFilter = THREE.NearestFilter;
-			// 	tex.magFilter = THREE.NearestFilter;
-			// 	tex.generateMipmaps = false;
-			// }),
+		const topMat = new THREE.RawShaderMaterial({
+			uniforms: {
+				uHeightTex: new THREE.Uniform(
+					new THREE.TextureLoader().load("./textures/stone_brick_height.png", tex => {
+						tex.minFilter = THREE.NearestFilter;
+						tex.magFilter = THREE.NearestFilter;
+						tex.generateMipmaps = false;
+					}),
+				),
+				uPaletteTex: new THREE.Uniform(
+					PaletteTexture.get(COLORS.STONE_BRICK),
+				),
+			},
+			vertexShader: vertexTopShader,
+			fragmentShader,
 		});
-		this._mesh = new THREE.Mesh(geometry, this._material);
+		const sideMat = new THREE.RawShaderMaterial({
+			vertexShader: vertexSideShader,
+			fragmentShader,
+		});
+
+		this._material = topMat;
+		this._mesh = new THREE.Mesh(geometry, [sideMat, sideMat, sideMat, sideMat, topMat, sideMat]);
 
 		const mesh = this._mesh;
 		mesh.translateX(width * x);

@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { range } from "../util";
+import { range, luma } from "../util";
 import { Palette, Vec3 } from "../type";
 
 const textures: Map<string, THREE.DataTexture> = new Map();
@@ -38,10 +38,8 @@ export default class PaletteTexture {
 		});
 
 		const diff = (col1: Vec3, col2: Vec3) => {
-			const r = col1[0] - col2[0];
-			const g = col1[1] - col2[1];
-			const b = col1[2] - col2[2];
-			return r * r + g * g + b * b;
+			const lumaDiff = luma(col1) - luma(col2);
+			return lumaDiff * lumaDiff;
 		};
 
 		const rgbOffset = 16;

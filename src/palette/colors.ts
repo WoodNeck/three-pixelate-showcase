@@ -176,3 +176,11 @@ export const SUPER_GAMEBOY: Palette = {
 		"#f7e7c6",
 	],
 };
+
+export const STONE_BRICK: Palette = {
+	name: "stone-brick",
+	colors: [
+		"#605C52",
+		"#2C2A25",
+	],
+};

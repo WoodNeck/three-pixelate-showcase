@@ -35,7 +35,8 @@ vec4 getOutlineCol(vec4 texCol) {
 	float val2 = step(threshold, diff2);
 	float isOutline = val * (1. - val2);
 
-	vec4 outlineCol = texture(uPaletteTex, vec2(1, 1));
+	// vec4 outlineCol = texture(uPaletteTex, vec2(1, 1));
+	vec4 outlineCol = vec4(1, 1, 1, 1);
 
 	return (1. - isOutline) * texCol + isOutline * outlineCol;
 }
@@ -53,9 +54,11 @@ void main() {
 	int x = int(gl_FragCoord.x) % 4;
 	int y = int(gl_FragCoord.y) % 4;
 
-	vec4 albedo_with_offset = albedo + (bayer[4*y+x] / 255.);
+	// vec4 albedo_with_offset = albedo + (bayer[4*y+x] / 255.);
 
-	vec2 pUV = getPaletteUV(albedo_with_offset);
-	vec4 restricted = texture(uPaletteTex, pUV);
-	fragColor = getOutlineCol(restricted);
+	// vec2 pUV = getPaletteUV(albedo_with_offset);
+	// vec4 restricted = texture(uPaletteTex, pUV);
+	// fragColor = getOutlineCol(albedo_with_offset);
+	// fragColor = getOutlineCol(albedo);
+	fragColor = albedo;
 }
