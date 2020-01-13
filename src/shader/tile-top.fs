@@ -1,6 +1,7 @@
 #version 300 es
 precision highp float;
 
+uniform sampler2D uTex;
 uniform sampler2D uPaletteTex;
 uniform sampler2D uHeightTex;
 
@@ -14,9 +15,9 @@ vec2 getPaletteUV(vec4 col) {
 }
 
 void main() {
-	// vec4 albedo = texture(uTex, vUv);
+	vec4 albedo = texture(uTex, vUv);
 	// vec2 pUV = getPaletteUV(albedo);
 	// col = texture(uPaletteTex, pUV);
-	// col = albedo;
-	col = vec4(vUv, 0, 1);
+	col = albedo;
+	// col = vec4(vUv, 0, 1);
 }

@@ -2,7 +2,8 @@ import * as THREE from "three";
 import Entity from "./Entity";
 import vertexTopShader from "../shader/tile-top.vs";
 import vertexSideShader from "../shader/tile-side.vs";
-import fragmentShader from "../shader/tile.fs";
+import fragTopShader from "../shader/tile-top.fs";
+import fragSideShader from "../shader/tile-side.fs";
 import PaletteTexture from "../palette/PaletteTexture";
 import * as COLORS from "../palette/colors";
 
@@ -22,8 +23,8 @@ export default class Tile implements Entity {
 		const geometry = new THREE.BoxGeometry(width, width, height, 30, 30, 30);
 		const topMat = new THREE.RawShaderMaterial({
 			uniforms: {
-				uHeightTex: new THREE.Uniform(
-					new THREE.TextureLoader().load("./textures/stone_brick_height.png", tex => {
+				uTex: new THREE.Uniform(
+					new THREE.TextureLoader().load("./textures/stone_top.png", tex => {
 						tex.minFilter = THREE.NearestFilter;
 						tex.magFilter = THREE.NearestFilter;
 						tex.generateMipmaps = false;
@@ -34,11 +35,20 @@ export default class Tile implements Entity {
 				),
 			},
 			vertexShader: vertexTopShader,
-			fragmentShader,
+			fragmentShader: fragTopShader,
 		});
 		const sideMat = new THREE.RawShaderMaterial({
+			uniforms: {
+				uTex: new THREE.Uniform(
+					new THREE.TextureLoader().load("./textures/testwall.png", tex => {
+						tex.minFilter = THREE.NearestFilter;
+						tex.magFilter = THREE.NearestFilter;
+						tex.generateMipmaps = false;
+					}),
+				),
+			},
 			vertexShader: vertexSideShader,
-			fragmentShader,
+			fragmentShader: fragSideShader,
 		});
 
 		this._material = topMat;
