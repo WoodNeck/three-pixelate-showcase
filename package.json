@@ -15,7 +15,7 @@
     "url": "git+https://github.com/WoodNeck/three-pixelate-showcase.git"
   },
   "dependencies": {
-    "three": "^0.107.0",
+    "three": "^0.112.1",
     "webpack": "4.33.0"
   },
   "devDependencies": {

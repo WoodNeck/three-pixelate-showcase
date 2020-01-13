@@ -36,6 +36,7 @@ export default class PixelatedLayer extends Layer {
 		this._scene.add(this._sun);
 
 		this._constructScene();
+		// this._camera.rotateOnWorldAxis(new THREE.Vector3(0, 0, 1), -THREE.Math.DEG2RAD * 180);
 	}
 
 	public update(ms: number) {
@@ -114,13 +115,13 @@ export default class PixelatedLayer extends Layer {
 		mesh.rotateZ(5);
 		this._scene.add(mesh);
 
-		const loader = new GLTFLoader();
+		// const loader = new GLTFLoader();
 
-		loader.load("./pidgeon.gltf", gltf => {
-			gltf.scene.rotateX(Math.PI / 2);
-			this._scene.add( gltf.scene );
-		}, undefined, error => {
-			console.error( error );
-		} );
+		// loader.load("./pidgeon.gltf", gltf => {
+		// 	gltf.scene.rotateX(Math.PI / 2);
+		// 	this._scene.add( gltf.scene );
+		// }, undefined, error => {
+		// 	console.error( error );
+		// } );
 	}
 }
