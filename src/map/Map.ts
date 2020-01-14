@@ -15,17 +15,44 @@ export default class Map {
 			dynamicTyping: true,
 		});
 		const meta = map.data.splice(0, 1);
+		const tileData = map.data;
 		const mapSize = meta[0];
 		const tiles = [];
 
-		for (const y of range(mapSize[1])) {
-			for (const x of range(mapSize[0])) {
+		const mapX = mapSize[0];
+		const mapY = mapSize[1];
+
+		for (const y of range(mapY)) {
+			for (const x of range(mapX)) {
 				const index = mapSize[0] * y + x;
-				const tileInfo = map.data[index];
+				const tileInfo = tileData[index];
 				const height = tileInfo[0];
 
+				const pxIdx = index + 1;
+				const nxIdx = index - 1;
+				const pyIdx = index + mapX;
+				const nyIdx = index - mapX;
+
+				const pxHeight = x < (mapX - 1) ? ((tileData[pxIdx] && tileData[pxIdx][0]) || 0) : 0;
+				const nxHeight = x > 0 ? ((tileData[nxIdx] && tileData[nxIdx][0]) || 0) : 0;
+				const pyHeight = (tileData[pyIdx] && tileData[pyIdx][0]) || 0;
+				const nyHeight = (tileData[nyIdx] && tileData[nyIdx][0]) || 0;
+
+				if (x === 0 && y === 0) {
+					console.log(pxHeight, nxHeight, pyHeight, nyHeight);
+				}
+
 				for (const h of range(height)) {
-					tiles.push(new Tile(x, y, h));
+					tiles.push(
+						new Tile(x, y, h, [
+							h + 1 > pxHeight,
+							h + 1 > nxHeight,
+							h + 1 > pyHeight,
+							h + 1 > nyHeight,
+							h + 1 === height,
+							false, // h === 0,
+						]),
+					);
 				}
 			}
 		}
