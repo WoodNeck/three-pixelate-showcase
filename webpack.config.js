@@ -15,11 +15,8 @@ module.exports = {
 
 	resolve: {
 		extensions: [".webpack.js", ".web.js", ".ts", ".tsx", ".js"],
-
-		// Shortcuts to avoid up-one-level hell: 
-		// Turns "../../../utils" into "Utils"
 		alias: {
-			Utils: path.resolve(__dirname, "./src/utils/"),
+			"@": path.resolve(__dirname, "./src/"),
 		},
 	},
 
@@ -27,14 +24,18 @@ module.exports = {
 		// Test file extension to run loader
 		rules: [
 			{
-				test: /\.(glsl|vs|fs)$/, 
+				test: /\.(glsl|vs|fs)$/,
 				loader: "ts-shader-loader"
 			},
 			{
-				test: /\.tsx?$/, 
+				test: /\.tsx?$/,
 				exclude: [/node_modules/, /tsOld/],
 				loader: "ts-loader"
-			}
+			},
+			{
+        test: /\.csv$/,
+        loader: 'raw-loader'
+      }
 		]
 	},
 

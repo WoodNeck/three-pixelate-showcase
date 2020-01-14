@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import Layer from "./Layer";
-import Tile from "../entity/Tile";
+import Map from "../map/Map";
 import cellVS from "../shader/cell.vs";
 import cellFS from "../shader/cell.fs";
 
@@ -36,14 +36,13 @@ export default class PixelatedLayer extends Layer {
 		this._scene.add(this._sun);
 
 		this._constructScene();
-		// this._camera.rotateOnWorldAxis(new THREE.Vector3(0, 0, 1), -THREE.Math.DEG2RAD * 180);
 	}
 
 	public update(ms: number) {
 		const theta = -THREE.Math.DEG2RAD * ms / 50;
 		this._sun.position.set(3 * Math.cos(theta), 3 * Math.sin(theta), 3);
 		this._sun.lookAt(0, 0, 0);
-		// this._camera.rotateOnWorldAxis(new THREE.Vector3(0, 0, 1), -THREE.Math.DEG2RAD * 1);
+		// this._camera.rotateOnWorldAxis(new THREE.Vector3(0, 0, 1), -THREE.Math.DEG2RAD * 0.4);
 	}
 
 	public updateScene(readTarget: THREE.WebGLRenderTarget) {}
@@ -79,41 +78,19 @@ export default class PixelatedLayer extends Layer {
 	}
 
 	private _constructScene() {
-		const tile = new Tile(0, 0, 0);
-		const tile2 = new Tile(1, 0, 0);
-		const tile3 = new Tile(2, -2, 0);
-		const tile4 = new Tile(3, -1, 0);
-		const tile5 = new Tile(3, -2, 0);
-		const tile6 = new Tile(4, -3, 0);
-		const tile7 = new Tile(4, -2, 1);
-		const tile8 = new Tile(-3, 4, 0);
-		const tile9 = new Tile(3, -3, 1);
-		const tile10 = new Tile(6, -5, 0);
-		const tile11 = new Tile(3, -3, 0);
-		const tile12 = new Tile(-5, 6, 0);
+		const map = new Map();
 
-		this.add(tile);
-		this.add(tile2);
-		this.add(tile3);
-		this.add(tile4);
-		this.add(tile5);
-		this.add(tile6);
-		this.add(tile7);
-		this.add(tile8);
-		this.add(tile9);
-		this.add(tile10);
-		this.add(tile11);
-		this.add(tile12);
+		map.tiles.forEach(tile => this.add(tile));
 
-		const geometry = new THREE.TorusKnotGeometry(3);
-		const material = new THREE.RawShaderMaterial({
-			vertexShader: cellVS,
-			fragmentShader: cellFS,
-		});
-		const mesh = new THREE.Mesh(geometry, material);
-		mesh.translateY(-10);
-		mesh.rotateZ(5);
-		this._scene.add(mesh);
+		// const geometry = new THREE.TorusKnotGeometry(3);
+		// const material = new THREE.RawShaderMaterial({
+		// 	vertexShader: cellVS,
+		// 	fragmentShader: cellFS,
+		// });
+		// const mesh = new THREE.Mesh(geometry, material);
+		// mesh.translateY(-10);
+		// mesh.rotateZ(5);
+		// this._scene.add(mesh);
 
 		// const loader = new GLTFLoader();
 
