@@ -16,7 +16,9 @@ export default class Tile implements Entity {
 	public get mesh() { return this._mesh; }
 
 	constructor(
-		x: number, y: number, z: number,
+		public readonly x: number,
+		public readonly y: number,
+		public readonly z: number,
 		planeVisibility: boolean[],
 	) {
 		// const geometry = new TileGeometry(widthModifier, widthModifier, depthModifier, planeVisibility);

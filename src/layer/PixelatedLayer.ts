@@ -8,6 +8,7 @@ import cellFS from "../shader/cell.fs";
 export default class PixelatedLayer extends Layer {
 	private _scene: THREE.Scene;
 	private _camera: THREE.OrthographicCamera;
+	private _map: Map;
 	private _sun: THREE.DirectionalLight;
 	private _pixelPerUnit: number = 8;
 
@@ -21,10 +22,14 @@ export default class PixelatedLayer extends Layer {
 		this._scene = new THREE.Scene();
 		this._scene.background = new THREE.Color("#1a1c2c");
 
-		this._camera = new THREE.OrthographicCamera(0, 0, 0, 0, -30, 30);
+		this._camera = new THREE.OrthographicCamera(0, 0, 0, 0, -120, 120);
 		this._camera.rotateZ(-THREE.Math.DEG2RAD * 45);
 		this._camera.rotateX(THREE.Math.DEG2RAD * 60);
-		this._camera.translateX(0);
+
+		// const viewDir = new THREE.Vector3(0, 0, -1).applyQuaternion(this._camera.quaternion);
+		// this._camera.position.add(viewDir.multiplyScalar(-30));
+
+		this._map = new Map();
 
 		this._sun = new THREE.DirectionalLight(new THREE.Color("#fff"), 2);
 
@@ -42,7 +47,7 @@ export default class PixelatedLayer extends Layer {
 		const theta = -THREE.Math.DEG2RAD * ms / 50;
 		this._sun.position.set(3 * Math.cos(theta), 3 * Math.sin(theta), 3);
 		this._sun.lookAt(0, 0, 0);
-		this._camera.rotateOnWorldAxis(new THREE.Vector3(0, 0, 1), -THREE.Math.DEG2RAD * 0.4);
+		// this._camera.rotateOnWorldAxis(new THREE.Vector3(0, 0, 1), -THREE.Math.DEG2RAD * 0.4);
 	}
 
 	public updateScene(readTarget: THREE.WebGLRenderTarget) {}
@@ -78,9 +83,9 @@ export default class PixelatedLayer extends Layer {
 	}
 
 	private _constructScene() {
-		const map = new Map();
-
-		map.tiles.forEach(tile => this.add(tile));
+		this._map.tiles.forEach(tiles => {
+			tiles.forEach(tile => this.add(tile));
+		});
 
 		// const geometry = new THREE.TorusKnotGeometry(3);
 		// const material = new THREE.RawShaderMaterial({

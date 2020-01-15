@@ -3,11 +3,13 @@ import PixelatedLayer from "./layer/PixelatedLayer";
 import ForegroundLayer from "./layer/ForegroundLayer";
 import OutlinePass from "./pass/OutlinePass";
 import RenderPass from "./pass/RenderPass";
+import Controls from "./Controls";
 
 class App {
 	private _renderer: Renderer;
 	private _pixelLayer: PixelatedLayer;
 	private _foreLayer: ForegroundLayer;
+	private _controls: Controls;
 
 	constructor() {
 		const canvasBox = document.getElementById("webgl-canvas") as HTMLCanvasElement;
@@ -16,6 +18,9 @@ class App {
 
 		this._pixelLayer = new PixelatedLayer();
 		this._foreLayer = new ForegroundLayer();
+
+		this._controls = new Controls(this._pixelLayer.camera);
+
 		this._composePass();
 		this._onResize();
 

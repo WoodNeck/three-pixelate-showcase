@@ -28,7 +28,7 @@ vec4 getOutlineCol(vec4 texCol) {
 	float td = texture(uDepthTex, tUv).r;
 	float ttd = texture(uDepthTex, ttUv).r;
 
-	float threshold = 0.16137430609 * 0.03333333333; // sqrt(5/3) / 8 * (30(Far), as camera is at 0)
+	float threshold = 0.16137430609 * 0.008333333333; // sqrt(5/3) / 8 * (120(Far), as camera is at 0)
 	float diff = td - cd;
 	float diff2 = ttd - td;
 	float val = step(threshold, diff);
