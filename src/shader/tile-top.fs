@@ -3,7 +3,6 @@ precision highp float;
 
 uniform sampler2D uTex;
 uniform sampler2D uPaletteTex;
-uniform sampler2D uHeightTex;
 
 in vec2 vUv;
 out vec4 col;

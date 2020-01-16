@@ -18,19 +18,19 @@ out vec4 fragColor;
 
 vec4 getOutlineCol(vec4 texCol) {
 	vec2 topPxl = gl_FragCoord.xy + vec2(0, 1);
-	vec2 top2Pxl = gl_FragCoord.xy + vec2(0, 2);
+	vec2 downPxl = gl_FragCoord.xy + vec2(0, -1);
 
 	vec2 uv = gl_FragCoord.xy * uInvTexSize;
 	vec2 tUv = topPxl * uInvTexSize;
-	vec2 ttUv = top2Pxl * uInvTexSize;
+	vec2 dUv = downPxl * uInvTexSize;
 
 	float cd = texture(uDepthTex, uv).r;
 	float td = texture(uDepthTex, tUv).r;
-	float ttd = texture(uDepthTex, ttUv).r;
+	float dd = texture(uDepthTex, dUv).r;
 
 	float threshold = 0.16137430609 * 0.008333333333; // sqrt(5/3) / 8 * (120(Far), as camera is at 0)
-	float diff = td - cd;
-	float diff2 = ttd - td;
+	float diff = cd - dd;
+	float diff2 = td - cd;
 	float val = step(threshold, diff);
 	float val2 = step(threshold, diff2);
 	float isOutline = val * (1. - val2);

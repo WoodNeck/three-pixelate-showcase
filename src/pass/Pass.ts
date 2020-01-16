@@ -1,5 +1,6 @@
 import * as THREE from "three";
-import Updateable from "src/interfaces/Updateable";
+
+import { Updateable } from "@/type";
 
 export default interface Pass extends Updateable {
 	readonly shouldSwap: boolean;

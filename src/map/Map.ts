@@ -1,7 +1,9 @@
+import * as THREE from "three";
 import { parse } from "papaparse";
+
+import Tile from "@/entity/Tile";
 import mapData from "./qadriga.csv";
 import { range } from "@/util";
-import Tile from "@/entity/Tile";
 
 export default class Map {
 	private _tiles: Tile[][];
@@ -41,15 +43,20 @@ export default class Map {
 
 				const tilesAtXY: Tile[] = [];
 				for (const h of range(height)) {
+					const planeVisibility = [
+						h + 1 > pxHeight,
+						h + 1 > nxHeight,
+						h + 1 > pyHeight,
+						h + 1 > nyHeight,
+						h + 1 === height,
+						h === 0,
+					];
+
 					tilesAtXY.push(
-						new Tile(x, y, h, [
-							h + 1 > pxHeight,
-							h + 1 > nxHeight,
-							h + 1 > pyHeight,
-							h + 1 > nyHeight,
-							h + 1 === height,
-							false, // h === 0,
-						]),
+						new Tile(
+							new THREE.Vector3(x, y, h),
+							planeVisibility,
+						),
 					);
 				}
 

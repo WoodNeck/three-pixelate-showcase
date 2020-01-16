@@ -62,7 +62,7 @@ export default class PixelatedLayer extends Layer {
 		// Width, Height of the render target
 		let rtW = Math.floor(drawingW / pixelPerUnit);
 		let rtH = Math.floor(drawingH / pixelPerUnit);
-		// Make sure they are multiple of 2
+		// Make sure they are even
 		rtW -= rtW % 2;
 		rtH -= rtH % 2;
 

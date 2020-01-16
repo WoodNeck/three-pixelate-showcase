@@ -1,6 +1,5 @@
 import * as THREE from "three";
 import Axes, { PanInput, MoveKeyInput } from "@egjs/axes";
-import Updateable from "./interfaces/Updateable";
 
 export default class Controls {
 	private _camera: THREE.Camera;

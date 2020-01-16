@@ -1,6 +1,7 @@
 import * as THREE from "three";
+
 import Pass from "./Pass";
-import Layer from "src/layer/Layer";
+import Layer from "@/layer/Layer";
 
 export default class RenderPass implements Pass {
 	private _layer: Layer;

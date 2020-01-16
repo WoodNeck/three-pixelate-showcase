@@ -1,5 +1,6 @@
 import * as THREE from "three";
-import Updateable from "src/interfaces/Updateable";
+
+import { Updateable } from "@/type";
 
 export default interface Entity extends Updateable {
 	readonly mesh: THREE.Mesh;

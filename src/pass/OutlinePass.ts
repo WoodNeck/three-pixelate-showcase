@@ -1,10 +1,11 @@
 import * as THREE from "three";
+
 import Pass from "./Pass";
-import EffectPlane from "../entity/EffectPlane";
-import outlineVS from "../shader/outline.vs";
-import outlineFS from "../shader/outline.fs";
-import PaletteTexture from "../palette/PaletteTexture";
-import * as COLORS from "../palette/colors";
+import EffectPlane from "@/entity/EffectPlane";
+import outlineVS from "@/shader/outline.vs";
+import outlineFS from "@/shader/outline.fs";
+import PaletteTexture from "@/palette/PaletteTexture";
+import * as COLORS from "@/palette/colors";
 
 export default class OutlinePass implements Pass {
 	public readonly shouldSwap = true;

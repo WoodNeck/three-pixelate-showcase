@@ -1,4 +1,5 @@
 import * as THREE from "three";
+
 import Entity from "./Entity";
 
 export default class EffectPlane implements Entity {

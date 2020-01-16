@@ -1,11 +1,13 @@
 import * as THREE from "three";
+
 import Entity from "./Entity";
-import vertexTopShader from "../shader/tile-top.vs";
-import vertexSideShader from "../shader/tile-side.vs";
-import fragTopShader from "../shader/tile-top.fs";
-import fragSideShader from "../shader/tile-side.fs";
-import PaletteTexture from "../palette/PaletteTexture";
-import * as COLORS from "../palette/colors";
+import vertexTopShader from "@/shader/tile-top.vs";
+import vertexSideShader from "@/shader/tile-side.vs";
+import fragTopShader from "@/shader/tile-top.fs";
+import fragSideShader from "@/shader/tile-side.fs";
+import PaletteTexture from "@/palette/PaletteTexture";
+import StoneWallTexturePack from "@/texgen/StoneWallTexturePack";
+import * as COLORS from "@/palette/colors";
 
 const depthModifier = 2 / Math.sqrt(3);
 const widthModifier = 2 * Math.SQRT2;
@@ -16,13 +18,9 @@ export default class Tile implements Entity {
 	public get mesh() { return this._mesh; }
 
 	constructor(
-		public readonly x: number,
-		public readonly y: number,
-		public readonly z: number,
+		public readonly pos: THREE.Vector3,
 		planeVisibility: boolean[],
 	) {
-		// const geometry = new TileGeometry(widthModifier, widthModifier, depthModifier, planeVisibility);
-
 		let visiblePlaneCount = 0;
 		const mergedGeometry = new THREE.Geometry();
 		const materials = planeVisibility.map((visible, idx) => {
@@ -100,9 +98,9 @@ export default class Tile implements Entity {
 		this._mesh = new THREE.Mesh(mergedGeometry, materials as THREE.RawShaderMaterial[]);
 		this._mesh.position.add(
 			new THREE.Vector3(
-				widthModifier * x,
-				widthModifier * y,
-				depthModifier * z,
+				widthModifier * pos.x,
+				widthModifier * pos.y,
+				depthModifier * pos.z,
 			),
 		);
 	}
@@ -129,15 +127,14 @@ export default class Tile implements Entity {
 	}
 
 	private _createSideXMaterial() {
+		const texturePack = new StoneWallTexturePack(16, 8, this.pos);
+
 		return new THREE.RawShaderMaterial({
 			uniforms: {
-				uTex: new THREE.Uniform(
-					new THREE.TextureLoader().load("./textures/stone_side2.png", tex => {
-						tex.minFilter = THREE.NearestFilter;
-						tex.magFilter = THREE.NearestFilter;
-						tex.generateMipmaps = false;
-					}),
-				),
+				albedoMap: new THREE.Uniform(texturePack.albedoMap),
+				displacementMap: new THREE.Uniform(texturePack.displacementMap),
+				aoMap: new THREE.Uniform(texturePack.aoMap),
+				normalMap: new THREE.Uniform(texturePack.normalMap),
 			},
 			vertexShader: vertexSideShader,
 			fragmentShader: fragSideShader,
@@ -145,15 +142,14 @@ export default class Tile implements Entity {
 	}
 
 	private _createSideYMaterial() {
+		const texturePack = new StoneWallTexturePack(16, 8, this.pos);
+
 		return new THREE.RawShaderMaterial({
 			uniforms: {
-				uTex: new THREE.Uniform(
-					new THREE.TextureLoader().load("./textures/stone_side1.png", tex => {
-						tex.minFilter = THREE.NearestFilter;
-						tex.magFilter = THREE.NearestFilter;
-						tex.generateMipmaps = false;
-					}),
-				),
+				albedoMap: new THREE.Uniform(texturePack.albedoMap),
+				displacementMap: new THREE.Uniform(texturePack.displacementMap),
+				aoMap: new THREE.Uniform(texturePack.aoMap),
+				normalMap: new THREE.Uniform(texturePack.normalMap),
 			},
 			vertexShader: vertexSideShader,
 			fragmentShader: fragSideShader,

@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import Updateable from "./interfaces/Updateable";
+import { Updateable } from "./type";
 import Pass from "./pass/Pass";
 import { WebGLRenderTargetOptions } from "three";
 

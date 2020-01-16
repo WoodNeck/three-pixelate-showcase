@@ -1,4 +1,4 @@
-import { Palette } from "src/type";
+import { Palette } from "@/type";
 
 // https://lospec.com/palette-list/sweetie-16
 export const SWEETIE16: Palette = {
