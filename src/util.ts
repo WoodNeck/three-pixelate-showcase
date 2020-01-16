@@ -12,3 +12,7 @@ export function* range(end: number) {
 export function luma(col: Vec3) {
 	return col[0] * 0.299 + col[1] * 0.587 + col[2] * 0.114;
 }
+
+export function random(seed: number) {
+	return (seed * 279470273) % 4294967291;
+}

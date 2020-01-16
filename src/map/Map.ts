@@ -25,6 +25,7 @@ export default class Map {
 		const mapX = mapSize[0];
 		const mapY = mapSize[1];
 
+		let tileIndex = 0;
 		for (const y of range(mapY)) {
 			for (const x of range(mapX)) {
 				const index = mapX * y + x;
@@ -56,8 +57,10 @@ export default class Map {
 						new Tile(
 							new THREE.Vector3(x, y, h),
 							planeVisibility,
+							tileIndex,
 						),
 					);
+					tileIndex += 1;
 				}
 
 				tiles.push(tilesAtXY);

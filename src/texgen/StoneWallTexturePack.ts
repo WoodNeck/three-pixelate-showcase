@@ -1,6 +1,7 @@
 import * as THREE from "three";
 
-import { range } from "@/util";
+import { range, random } from "@/util";
+import Map from "@/map/Map";
 
 // Procedually generated stone wall texture
 export default class StoneWallTexturePack {
@@ -17,6 +18,7 @@ export default class StoneWallTexturePack {
 	constructor(
 		width: number, height: number,
 		tilePos: THREE.Vector3,
+		tileIndex: number,
 	) {
 		const gridInterval = 4;
 		const textureSize = width * height;
@@ -32,10 +34,19 @@ export default class StoneWallTexturePack {
 		for (const y of range(height)) {
 			for (const x of range(width)) {
 				const texIndex = y * width + x;
-				if ((x + 1) % gridInterval === 0 || y % gridInterval === 0) {
-					albedoData[3 * texIndex + 0] = 0;
-					albedoData[3 * texIndex + 1] = 0;
-					albedoData[3 * texIndex + 2] = 0;
+
+				const gridX = Math.floor(x / gridInterval);
+				const gridY = Math.floor(y / gridInterval);
+				const gridOffsetX = (x + 1) % gridInterval;
+				const gridOffsetY = y % gridInterval;
+
+				const isClosedX = Math.floor(random(this._randomSeedAt(tileIndex, gridX, gridY)) % 2);
+				const isGrid = (x !== width - 1 && gridOffsetX === 0 && !isClosedX) || (gridOffsetY === 0);
+
+				if (isGrid) {
+					albedoData[3 * texIndex + 0] = 55;
+					albedoData[3 * texIndex + 1] = 55;
+					albedoData[3 * texIndex + 2] = 55;
 				} else {
 					albedoData[3 * texIndex + 0] = 10 * tilePos.x;
 					albedoData[3 * texIndex + 1] = 10 * tilePos.y;
@@ -48,5 +59,10 @@ export default class StoneWallTexturePack {
 		this._displacement = new THREE.DataTexture(displacementData, width, height, THREE.RGBFormat, THREE.UnsignedByteType);
 		this._ao = new THREE.DataTexture(aoData, width, height, THREE.RedFormat, THREE.FloatType);
 		this._normal = new THREE.DataTexture(normalData, width, height, THREE.RGBAFormat, THREE.FloatType);
+	}
+
+	private _randomSeedAt(tileIndex: number, gridX: number, gridY: number) {
+		// for x grid, 8 grid is calculated per tile
+		return 8 * tileIndex + (4 * gridY + gridX);
 	}
 }

@@ -20,6 +20,7 @@ export default class Tile implements Entity {
 	constructor(
 		public readonly pos: THREE.Vector3,
 		planeVisibility: boolean[],
+		tileIndex: number,
 	) {
 		let visiblePlaneCount = 0;
 		const mergedGeometry = new THREE.Geometry();
@@ -34,19 +35,19 @@ export default class Tile implements Entity {
 				case 1:
 					// X
 					geometry = new THREE.PlaneGeometry(widthModifier, depthModifier);
-					material = this._createSideXMaterial();
+					material = this._createSideXMaterial(tileIndex);
 					break;
 				case 2:
 				case 3:
 					// Y
 					geometry = new THREE.PlaneGeometry(widthModifier, depthModifier);
-					material = this._createSideYMaterial();
+					material = this._createSideYMaterial(tileIndex);
 					break;
 				case 4:
 				case 5:
 					// Z
 					geometry = new THREE.PlaneGeometry(widthModifier, widthModifier);
-					material = this._createTopMaterial();
+					material = this._createTopMaterial(tileIndex);
 					break;
 			}
 
@@ -107,7 +108,7 @@ export default class Tile implements Entity {
 
 	public update(ms: number) {}
 
-	private _createTopMaterial() {
+	private _createTopMaterial(tileIndex: number) {
 		return new THREE.RawShaderMaterial({
 			uniforms: {
 				uTex: new THREE.Uniform(
@@ -126,8 +127,8 @@ export default class Tile implements Entity {
 		});
 	}
 
-	private _createSideXMaterial() {
-		const texturePack = new StoneWallTexturePack(16, 8, this.pos);
+	private _createSideXMaterial(tileIndex: number) {
+		const texturePack = new StoneWallTexturePack(16, 8, this.pos, tileIndex);
 
 		return new THREE.RawShaderMaterial({
 			uniforms: {
@@ -141,8 +142,8 @@ export default class Tile implements Entity {
 		});
 	}
 
-	private _createSideYMaterial() {
-		const texturePack = new StoneWallTexturePack(16, 8, this.pos);
+	private _createSideYMaterial(tileIndex: number) {
+		const texturePack = new StoneWallTexturePack(16, 8, this.pos, tileIndex);
 
 		return new THREE.RawShaderMaterial({
 			uniforms: {
