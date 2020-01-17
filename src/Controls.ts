@@ -23,6 +23,7 @@ export default class Controls {
 		this._axes.connect(["x", "y"], moveKeyInput);
 
 		this._setupAxesHandler();
+		this._setupKeys();
 	}
 
 	private _setupAxesHandler() {
@@ -35,8 +36,27 @@ export default class Controls {
 
 			if (delta.yaw !== 0) {
 				camera.rotateOnWorldAxis(
-					new THREE.Vector3(0, 0, 1).normalize(),
+					new THREE.Vector3(0, 0, 1),
 					(delta.yaw * Math.PI) / 180,
+				);
+			}
+		});
+	}
+
+	private _setupKeys() {
+		const camera = this._camera;
+		window.addEventListener("keydown", e => {
+			if (e.keyCode === 81) {
+				// Q
+				camera.rotateOnWorldAxis(
+					new THREE.Vector3(0, 0, 1),
+					Math.PI / 2,
+				);
+			} else if (e.keyCode === 69) {
+				// E
+				camera.rotateOnWorldAxis(
+					new THREE.Vector3(0, 0, 1),
+					-Math.PI / 2,
 				);
 			}
 		});

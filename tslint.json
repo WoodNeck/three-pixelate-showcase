@@ -37,7 +37,7 @@
 				{"type": "property", "modifiers": ["public", "static", "const"], "format": "UPPER_CASE"},
 				{"type": "type", "format": "PascalCase"},
 				{"type": "genericTypeParameter", "prefix": "T"},
-				{"type": "enumMember", "format": "PascalCase"}
+				{"type": "enumMember", "format": "UPPER_CASE"}
 			]
     },
     "linterOptions": {

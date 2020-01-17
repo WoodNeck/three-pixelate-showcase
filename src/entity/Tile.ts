@@ -6,8 +6,10 @@ import vertexSideShader from "@/shader/tile-side.vs";
 import fragTopShader from "@/shader/tile-top.fs";
 import fragSideShader from "@/shader/tile-side.fs";
 import PaletteTexture from "@/palette/PaletteTexture";
+import Map from "@/map/Map";
 import StoneWallTexturePack from "@/texgen/StoneWallTexturePack";
 import * as COLORS from "@/palette/colors";
+import { TILE_SIDE } from "@/const";
 
 const depthModifier = 2 / Math.sqrt(3);
 const widthModifier = 2 * Math.SQRT2;
@@ -20,7 +22,7 @@ export default class Tile implements Entity {
 	constructor(
 		public readonly pos: THREE.Vector3,
 		planeVisibility: boolean[],
-		tileIndex: number,
+		map: Map,
 	) {
 		let visiblePlaneCount = 0;
 		const mergedGeometry = new THREE.Geometry();
@@ -35,19 +37,19 @@ export default class Tile implements Entity {
 				case 1:
 					// X
 					geometry = new THREE.PlaneGeometry(widthModifier, depthModifier);
-					material = this._createSideXMaterial(tileIndex);
+					material = this._createSideXMaterial(map);
 					break;
 				case 2:
 				case 3:
 					// Y
 					geometry = new THREE.PlaneGeometry(widthModifier, depthModifier);
-					material = this._createSideYMaterial(tileIndex);
+					material = this._createSideYMaterial(map);
 					break;
 				case 4:
 				case 5:
 					// Z
 					geometry = new THREE.PlaneGeometry(widthModifier, widthModifier);
-					material = this._createTopMaterial(tileIndex);
+					material = this._createTopMaterial(map);
 					break;
 			}
 
@@ -108,7 +110,7 @@ export default class Tile implements Entity {
 
 	public update(ms: number) {}
 
-	private _createTopMaterial(tileIndex: number) {
+	private _createTopMaterial(map: Map) {
 		return new THREE.RawShaderMaterial({
 			uniforms: {
 				uTex: new THREE.Uniform(
@@ -127,8 +129,8 @@ export default class Tile implements Entity {
 		});
 	}
 
-	private _createSideXMaterial(tileIndex: number) {
-		const texturePack = new StoneWallTexturePack(16, 8, this.pos, tileIndex);
+	private _createSideXMaterial(map: Map) {
+		const texturePack = new StoneWallTexturePack(TILE_SIDE.X, this.pos, map);
 
 		return new THREE.RawShaderMaterial({
 			uniforms: {
@@ -142,8 +144,8 @@ export default class Tile implements Entity {
 		});
 	}
 
-	private _createSideYMaterial(tileIndex: number) {
-		const texturePack = new StoneWallTexturePack(16, 8, this.pos, tileIndex);
+	private _createSideYMaterial(map: Map) {
+		const texturePack = new StoneWallTexturePack(TILE_SIDE.Y, this.pos, map);
 
 		return new THREE.RawShaderMaterial({
 			uniforms: {

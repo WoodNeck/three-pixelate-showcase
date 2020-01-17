@@ -14,5 +14,5 @@ export function luma(col: Vec3) {
 }
 
 export function random(seed: number) {
-	return (seed * 279470273) % 4294967291;
+	return (Math.imul(741103597, seed) >>> 0) / (2 ** 32);
 }

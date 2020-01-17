@@ -10,6 +10,7 @@ export default class Map {
 	private _mapSize: number[];
 
 	public get tiles() { return this._tiles; }
+	public get mapSize() { return this._mapSize; }
 
 	constructor() {
 		// Load map
@@ -19,13 +20,13 @@ export default class Map {
 		});
 		const meta = map.data.splice(0, 1);
 		const tileData = map.data;
-		const mapSize = meta[0];
 		const tiles: Tile[][] = [];
+		const mapSize = meta[0];
+		this._mapSize = mapSize;
 
 		const mapX = mapSize[0];
 		const mapY = mapSize[1];
 
-		let tileIndex = 0;
 		for (const y of range(mapY)) {
 			for (const x of range(mapX)) {
 				const index = mapX * y + x;
@@ -57,10 +58,9 @@ export default class Map {
 						new Tile(
 							new THREE.Vector3(x, y, h),
 							planeVisibility,
-							tileIndex,
+							this,
 						),
 					);
-					tileIndex += 1;
 				}
 
 				tiles.push(tilesAtXY);
@@ -68,10 +68,12 @@ export default class Map {
 		}
 
 		this._tiles = tiles;
-		this._mapSize = mapSize;
 	}
 
-	public getTilesAt(x: number, y: number): Tile[] {
-		return this._tiles[y * this._mapSize[0] + x];
+	public getHeightAt(x: number, y: number): number {
+		const index = y * this._mapSize[0] + x;
+		return this._tiles[index]
+			? this._tiles[index].length
+			: 0;
 	}
 }

@@ -1,7 +1,8 @@
 import * as THREE from "three";
 
-import { range, random } from "@/util";
 import Map from "@/map/Map";
+import { range, random } from "@/util";
+import { TILE_SIDE } from "@/const";
 
 // Procedually generated stone wall texture
 export default class StoneWallTexturePack {
@@ -16,12 +17,23 @@ export default class StoneWallTexturePack {
 	public get normalMap() { return this._normal; }
 
 	constructor(
-		width: number, height: number,
+		side: TILE_SIDE,
 		tilePos: THREE.Vector3,
-		tileIndex: number,
+		map: Map,
 	) {
+		const width = 16;
+		const height = 8;
 		const gridInterval = 4;
 		const textureSize = width * height;
+		const mapSize = map.mapSize;
+		const patterns = [
+			[false, true, false],
+			[true, true, false],
+			[false, true, true],
+			[true, false, true],
+			[true, true, true],
+		];
+
 		// 0 ~ 255
 		const albedoData = new Uint8Array(3 * textureSize);
 		// 0 ~ 255
@@ -31,26 +43,51 @@ export default class StoneWallTexturePack {
 		// 0 ~ 1
 		const normalData = new Float32Array(4 * textureSize);
 
+		const nextTilePos = tilePos.clone();
+		nextTilePos.setX(nextTilePos.x + 1);
+
+		const tileIndex = this._tileIndexAt(tilePos, mapSize);
+		const nextTileIndex = this._tileIndexAt(nextTilePos, mapSize);
+
+		const randomValTop = Math.floor(random(this._randomSeedAt(side, tileIndex, 0)) * patterns.length);
+		const randomValBottom = Math.floor(random(this._randomSeedAt(side, tileIndex, 1)) * patterns.length);
+		const randomValNextTop = Math.floor(random(this._randomSeedAt(side, nextTileIndex, 0)) * patterns.length);
+		const randomValNextBottom = Math.floor(random(this._randomSeedAt(side, nextTileIndex, 1)) * patterns.length);
+
+		const chosenPatterns = [
+			patterns[randomValTop],
+			patterns[randomValBottom],
+		];
+		const chosenPatternsNextTile = [
+			patterns[randomValNextTop],
+			patterns[randomValNextBottom],
+		];
+
 		for (const y of range(height)) {
 			for (const x of range(width)) {
 				const texIndex = y * width + x;
-
 				const gridX = Math.floor(x / gridInterval);
 				const gridY = Math.floor(y / gridInterval);
 				const gridOffsetX = (x + 1) % gridInterval;
-				const gridOffsetY = y % gridInterval;
+				const gridOffsetY = (y + 1) % gridInterval;
 
-				const isClosedX = Math.floor(random(this._randomSeedAt(tileIndex, gridX, gridY)) % 2);
-				const isGrid = (x !== width - 1 && gridOffsetX === 0 && !isClosedX) || (gridOffsetY === 0);
+				const isClosedX = gridX !== 3
+					? chosenPatterns[gridY][gridX]
+					: !chosenPatterns[gridY][2] || !chosenPatternsNextTile[gridY][0];
+				const isClosedY = gridY === 0
+					? true // chosenPatterns[0][gridX - 1] !== chosenPatterns[1][gridX - 1] || chosenPatterns[0][gridX] !== chosenPatterns[1][gridX]
+					: true;
+				const isGrid = (gridOffsetX === 0 && isClosedX)
+					|| (gridOffsetY === 0 && isClosedY);
 
 				if (isGrid) {
-					albedoData[3 * texIndex + 0] = 55;
-					albedoData[3 * texIndex + 1] = 55;
-					albedoData[3 * texIndex + 2] = 55;
+					albedoData[3 * texIndex + 0] = 0;
+					albedoData[3 * texIndex + 1] = 0;
+					albedoData[3 * texIndex + 2] = 0;
 				} else {
-					albedoData[3 * texIndex + 0] = 10 * tilePos.x;
-					albedoData[3 * texIndex + 1] = 10 * tilePos.y;
-					albedoData[3 * texIndex + 2] = 10 * tilePos.z;
+					albedoData[3 * texIndex + 0] = 255;
+					albedoData[3 * texIndex + 1] = 255;
+					albedoData[3 * texIndex + 2] = 255;
 				}
 			}
 		}
@@ -59,10 +96,15 @@ export default class StoneWallTexturePack {
 		this._displacement = new THREE.DataTexture(displacementData, width, height, THREE.RGBFormat, THREE.UnsignedByteType);
 		this._ao = new THREE.DataTexture(aoData, width, height, THREE.RedFormat, THREE.FloatType);
 		this._normal = new THREE.DataTexture(normalData, width, height, THREE.RGBAFormat, THREE.FloatType);
+
+		this._albedo.flipY = true;
 	}
 
-	private _randomSeedAt(tileIndex: number, gridX: number, gridY: number) {
-		// for x grid, 8 grid is calculated per tile
-		return 8 * tileIndex + (4 * gridY + gridX);
+	private _tileIndexAt(pos: THREE.Vector3, mapSize: number[]) {
+		return pos.x + pos.y * mapSize[0] + pos.z * mapSize[0] * mapSize[1];
+	}
+
+	private _randomSeedAt(side: number, tileIndex: number, offset: number) {
+		return 4 * tileIndex + 2 * offset + side;
 	}
 }
