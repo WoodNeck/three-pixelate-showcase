@@ -1,3 +1,6 @@
 export enum TILE_SIDE {
-	X, Y,
+	PX,
+	NX,
+	PY,
+	NY,
 }

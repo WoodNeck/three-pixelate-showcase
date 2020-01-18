@@ -34,16 +34,24 @@ export default class Tile implements Entity {
 
 			switch (idx) {
 				case 0:
-				case 1:
-					// X
+					// +X
 					geometry = new THREE.PlaneGeometry(widthModifier, depthModifier);
-					material = this._createSideXMaterial(map);
+					material = this._createSideMaterial(map, TILE_SIDE.PX);
+					break;
+				case 1:
+					// -X
+					geometry = new THREE.PlaneGeometry(widthModifier, depthModifier);
+					material = this._createSideMaterial(map, TILE_SIDE.NX);
 					break;
 				case 2:
-				case 3:
-					// Y
+					// +Y
 					geometry = new THREE.PlaneGeometry(widthModifier, depthModifier);
-					material = this._createSideYMaterial(map);
+					material = this._createSideMaterial(map, TILE_SIDE.PY);
+					break;
+				case 3:
+					// -Y
+					geometry = new THREE.PlaneGeometry(widthModifier, depthModifier);
+					material = this._createSideMaterial(map, TILE_SIDE.NY);
 					break;
 				case 4:
 				case 5:
@@ -129,23 +137,8 @@ export default class Tile implements Entity {
 		});
 	}
 
-	private _createSideXMaterial(map: Map) {
-		const texturePack = new StoneWallTexturePack(TILE_SIDE.X, this.pos, map);
-
-		return new THREE.RawShaderMaterial({
-			uniforms: {
-				albedoMap: new THREE.Uniform(texturePack.albedoMap),
-				displacementMap: new THREE.Uniform(texturePack.displacementMap),
-				aoMap: new THREE.Uniform(texturePack.aoMap),
-				normalMap: new THREE.Uniform(texturePack.normalMap),
-			},
-			vertexShader: vertexSideShader,
-			fragmentShader: fragSideShader,
-		});
-	}
-
-	private _createSideYMaterial(map: Map) {
-		const texturePack = new StoneWallTexturePack(TILE_SIDE.Y, this.pos, map);
+	private _createSideMaterial(map: Map, side: TILE_SIDE) {
+		const texturePack = new StoneWallTexturePack(side, this.pos, map);
 
 		return new THREE.RawShaderMaterial({
 			uniforms: {
