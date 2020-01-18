@@ -1,8 +1,9 @@
 import * as THREE from "three";
 
 import Map from "@/map/Map";
-import { range, random } from "@/util";
+import { range, random, parseColorHex } from "@/util";
 import { TILE_SIDE } from "@/const";
+import * as COLORS from "@/palette/colors";
 
 // Procedually generated stone wall texture
 export default class StoneWallTexturePack {
@@ -112,6 +113,19 @@ export default class StoneWallTexturePack {
 			patterns[randomValCCWTileBottom],
 		];
 
+		// Colors for each grid
+		const palette = COLORS.ENDESGA16;
+		const paletteLength = palette.colors.length;
+		const chosenColors = [...range(8)].map(idx => {
+			return parseColorHex(palette.colors[this._randomValAt(side, tilePos, idx, paletteLength)]);
+		});
+		const chosenNextColors = [...range(8)].map(idx => {
+			return parseColorHex(palette.colors[this._randomValAt(side, nextTilePos, idx, paletteLength)]);
+		});
+		const chosenCCWColors = [...range(8)].map(idx => {
+			return parseColorHex(palette.colors[this._randomValAt(ccwSide, tilePos, idx, paletteLength)]);
+		});
+
 		// Height of current tile, starting from 1
 		const tileHeight = tilePos.z + 1;
 		const prevGridHeight = map.getHeightAt(prevTilePos.x, prevTilePos.y);
@@ -156,7 +170,7 @@ export default class StoneWallTexturePack {
 				let isOpenY = false;
 
 				if (gridY === 0) {
-					const isSameTopBottom = chosenPatterns[0][gridX - 1] === chosenPatterns[1][gridX - 1] && chosenPatterns[0][gridX] === chosenPatterns[1][gridX]
+					const isSameTopBottom = chosenPatterns[0][gridX - 1] === chosenPatterns[1][gridX - 1] && chosenPatterns[0][gridX] === chosenPatterns[1][gridX];
 
 					if (gridX < 1) {
 						if (hasPrevTile) {
@@ -185,9 +199,12 @@ export default class StoneWallTexturePack {
 							isOpenY = connectedTopWithCCWTile && connectedBottomWithCCWTile;
 						}
 					} else {
-						isOpenY = gridX < 2
-							? isSameTopBottom && hasPrevTile
-							: isSameTopBottom && hasNextTile;
+						const isSquared = !chosenPatterns[0][1] && !chosenPatterns[1][1];
+
+						isOpenY = isSquared
+							|| gridX < 2
+								? isSameTopBottom && hasPrevTile
+								: isSameTopBottom && hasNextTile;
 					}
 				}
 
@@ -199,15 +216,49 @@ export default class StoneWallTexturePack {
 					albedoData[3 * texIndex + 1] = 0;
 					albedoData[3 * texIndex + 2] = 0;
 				} else {
-					if (side === TILE_SIDE.PY || side === TILE_SIDE.NY) {
-						albedoData[3 * texIndex + 0] = 255;
-						albedoData[3 * texIndex + 1] = 255;
-						albedoData[3 * texIndex + 2] = 255;
-					} else {
-						albedoData[3 * texIndex + 0] = 128;
-						albedoData[3 * texIndex + 1] = 128;
-						albedoData[3 * texIndex + 2] = 128;
+					let chosenColor = chosenColors[gridY * 4 + gridX];
+
+					if (tilePos.x === 0 && tilePos.y === 0 && tilePos.z === 0 && side === TILE_SIDE.NX && gridX === 2 && gridY === 0) {
+						const nextColors = hasNextTile
+							? chosenNextColors
+							: chosenCCWColors;
+						const offset = hasNextTile || chosenPatternsCCWTile[gridY][0]
+							? 0
+							: 1;
+						chosenColor = gridX > 2
+							? nextColors[gridY * 4 + offset]
+							: chosenColors[gridY * 4 + gridX + 1];
 					}
+					if (!isClosedX) {
+						const nextColors = hasNextTile
+							? chosenNextColors
+							: chosenCCWColors;
+						const offset = hasNextTile || chosenPatternsCCWTile[gridY][0]
+							? 0
+							: 1;
+						chosenColor = (gridX > 2) || (gridX > 1 && !hasNextTile)
+							? nextColors[gridY * 4 + offset]
+							: chosenColors[gridY * 4 + gridX + 1];
+					}
+					if (isOpenY) {
+						if (!isClosedX) {
+							const nextColors = hasNextTile
+								? chosenNextColors
+								: chosenCCWColors;
+							const offset = hasNextTile || chosenPatternsCCWTile[gridY][0]
+								? 0
+								: 1;
+							chosenColor = (gridX > 2) || (gridX > 1 && !hasNextTile)
+								? nextColors[4 + offset]
+								: chosenColors[4 + gridX + 1];
+						} else {
+							chosenColor = chosenColors[4 + gridX];
+						}
+					}
+
+					albedoData[3 * texIndex + 0] = chosenColor[0];
+					albedoData[3 * texIndex + 1] = chosenColor[1];
+					albedoData[3 * texIndex + 2] = chosenColor[2];
 				}
 			}
 		}
@@ -224,11 +275,11 @@ export default class StoneWallTexturePack {
 		return pos.x + pos.y * mapSize[0] + pos.z * mapSize[0] * mapSize[1];
 	}
 
-	private _randomSeedAt(side: TILE_SIDE, tileIndex: number, offset: 0|1) {
-		return 8 * tileIndex + 4 * offset + side;
+	private _randomSeedAt(side: TILE_SIDE, tileIndex: number, offset: number) {
+		return 32 * tileIndex + 8 * side + offset;
 	}
 
-	private _randomValAt(side: TILE_SIDE, pos: THREE.Vector3, offset: 0|1, max: number) {
+	private _randomValAt(side: TILE_SIDE, pos: THREE.Vector3, offset: number, max: number) {
 		const tileIndex = this._tileIndexAt(pos, this._map.mapSize);
 		return Math.floor(random(this._randomSeedAt(side, tileIndex, offset)) * max);
 	}

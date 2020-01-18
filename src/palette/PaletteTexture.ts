@@ -1,6 +1,6 @@
 import * as THREE from "three";
 
-import { range, luma } from "@/util";
+import { range, luma, parseColorHex } from "@/util";
 import { Palette, Vec3 } from "@/type";
 
 const textures: Map<string, THREE.DataTexture> = new Map();
@@ -22,21 +22,7 @@ export default class PaletteTexture {
 		const texSize = texWidth * texWidth;
 		const colorData = new Uint8Array(3 * texSize);
 
-		const colors: Vec3[] = palette.colors.map(col => {
-			col = col.startsWith("#")
-				? col.substr(1)
-				: col;
-
-			if (col.length === 3) {
-				col = `${col[0]}${col[0]}${col[1]}${col[1]}${col[2]}${col[2]}`;
-			}
-
-			return [
-				parseInt(col.substring(0, 2), 16),
-				parseInt(col.substring(2, 4), 16),
-				parseInt(col.substring(4, 6), 16),
-			];
-		});
+		const colors: Vec3[] = palette.colors.map(parseColorHex);
 
 		const diff = (col1: Vec3, col2: Vec3) => {
 			const lumaDiff = luma(col1) - luma(col2);
