@@ -139,16 +139,21 @@ export default class Tile implements Entity {
 
 	private _createSideMaterial(map: Map, side: TILE_SIDE) {
 		const texturePack = new StoneWallTexturePack(side, this.pos, map);
-
-		return new THREE.RawShaderMaterial({
-			uniforms: {
+		const uniforms = THREE.UniformsUtils.merge([
+			THREE.UniformsLib.lights,
+			{
 				albedoMap: new THREE.Uniform(texturePack.albedoMap),
 				displacementMap: new THREE.Uniform(texturePack.displacementMap),
 				aoMap: new THREE.Uniform(texturePack.aoMap),
 				normalMap: new THREE.Uniform(texturePack.normalMap),
 			},
+		]);
+
+		return new THREE.RawShaderMaterial({
+			uniforms: uniforms,
 			vertexShader: vertexSideShader,
 			fragmentShader: fragSideShader,
+			lights: true,
 		});
 	}
 }
