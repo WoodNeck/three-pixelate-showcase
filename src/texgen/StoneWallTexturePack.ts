@@ -5,30 +5,170 @@ import { range, random, parseColorHex } from "@/util";
 import { TILE_SIDE } from "@/const";
 import * as COLORS from "@/palette/colors";
 
+const TOP_WIDTH = 16;
+const TOP_HEIGHT = 16;
+const SIDE_WIDTH = 16;
+const SIDE_HEIGHT = 8;
+const GRID_INTERVAL = 4;
+
 // Procedually generated stone wall texture
 export default class StoneWallTexturePack {
-	private _albedo: THREE.DataTexture;
-	private _displacement: THREE.DataTexture;
-	private _ao: THREE.DataTexture;
-	private _normal: THREE.DataTexture;
 	private _map: Map;
-
-	public get albedoMap() { return this._albedo; }
-	public get displacementMap() { return this._displacement; }
-	public get aoMap() { return this._ao; }
-	public get normalMap() { return this._normal; }
+	private _tilePos: THREE.Vector3;
 
 	constructor(
-		side: TILE_SIDE,
 		tilePos: THREE.Vector3,
 		map: Map,
 	) {
-		const width = 16;
-		const height = 8;
-		const gridInterval = 4;
-
+		this._tilePos = tilePos;
 		this._map = map;
+	}
 
+	public generateTop(): {
+		albedoMap: THREE.DataTexture,
+		displacementMap: THREE.DataTexture,
+		aoMap: THREE.DataTexture,
+		normalMap: THREE.DataTexture,
+	} {
+		const width = TOP_WIDTH;
+		const height = TOP_HEIGHT;
+		const topData = this._generateTopData(width, height);
+
+		const albedoMap = new THREE.DataTexture(topData.albedoData, width, height, THREE.RGBFormat, THREE.UnsignedByteType);
+		const displacementMap = new THREE.DataTexture(topData.displacementData, width, height, THREE.RGBFormat, THREE.UnsignedByteType);
+		const aoMap = new THREE.DataTexture(topData.aoData, width, height, THREE.RedFormat, THREE.FloatType);
+		const normalMap = new THREE.DataTexture(topData.normalData, width, height, THREE.RGBAFormat, THREE.FloatType);
+
+		albedoMap.flipY = true;
+		displacementMap.flipY = true;
+		aoMap.flipY = true;
+		normalMap.flipY = true;
+
+		return {
+			albedoMap,
+			displacementMap,
+			aoMap,
+			normalMap,
+		};
+	}
+
+	public generateSide(side: TILE_SIDE): {
+		albedoMap: THREE.DataTexture,
+		displacementMap: THREE.DataTexture,
+		aoMap: THREE.DataTexture,
+		normalMap: THREE.DataTexture,
+	} {
+		const width = SIDE_WIDTH;
+		const height = SIDE_HEIGHT;
+		const sideData = this._generateSideData(side, width, height);
+
+		const albedoMap = new THREE.DataTexture(sideData.albedoData, width, height, THREE.RGBFormat, THREE.UnsignedByteType);
+		const displacementMap = new THREE.DataTexture(sideData.displacementData, width, height, THREE.RGBFormat, THREE.UnsignedByteType);
+		const aoMap = new THREE.DataTexture(sideData.aoData, width, height, THREE.RedFormat, THREE.FloatType);
+		const normalMap = new THREE.DataTexture(sideData.normalData, width, height, THREE.RGBAFormat, THREE.FloatType);
+
+		albedoMap.flipY = true;
+		displacementMap.flipY = true;
+		aoMap.flipY = true;
+		normalMap.flipY = true;
+
+		return {
+			albedoMap,
+			displacementMap,
+			aoMap,
+			normalMap,
+		};
+	}
+
+	private _generateTopData(width: number, height: number): {
+		albedoData: Uint8Array,
+		displacementData: Uint8Array,
+		aoData: Float32Array,
+		normalData: Float32Array,
+	} {
+		const map = this._map;
+		const tilePos = this._tilePos;
+		const gridInterval = GRID_INTERVAL;
+		const textureSize = width * height;
+
+		const sideDatas = [TILE_SIDE.PX, TILE_SIDE.NX, TILE_SIDE.PY, TILE_SIDE.NY].map(side => {
+			return this._generateSideData(side, SIDE_WIDTH, SIDE_HEIGHT);
+		});
+
+		const albedoData = new Uint8Array(3 * textureSize); // 0 ~ 255
+		const displacementData = new Uint8Array(3 * textureSize); // 0 ~ 255
+		const aoData = new Float32Array(textureSize); // 0 ~ 1
+		const normalData = new Float32Array(4 * textureSize); // 0 ~ 1
+
+		const tileHeight = tilePos.z + 1;
+		const nxTileHeight = map.getHeightAt(tilePos.x - 1, tilePos.y);
+		const nyTileHeight = map.getHeightAt(tilePos.x, tilePos.y - 1);
+		const hasNXTile = tileHeight <= nxTileHeight;
+		const hasNYTile = tileHeight <= nyTileHeight;
+
+		const isBlack = (data: Uint8Array, idx: number) => {
+			return data[3 * idx] === 0
+				&& data[3 * idx + 1] === 0
+				&& data[3 * idx + 2] === 0;
+		};
+		const gridX = [
+			isBlack(sideDatas[TILE_SIDE.PY].albedoData, 15), isBlack(sideDatas[TILE_SIDE.PY].albedoData, 11), isBlack(sideDatas[TILE_SIDE.PY].albedoData, 7), isBlack(sideDatas[TILE_SIDE.PY].albedoData, 3),
+			isBlack(sideDatas[TILE_SIDE.PY].albedoData, 15), isBlack(sideDatas[TILE_SIDE.PY].albedoData, 11), isBlack(sideDatas[TILE_SIDE.PY].albedoData, 7), isBlack(sideDatas[TILE_SIDE.PY].albedoData, 3),
+			isBlack(sideDatas[TILE_SIDE.PY].albedoData, 15), isBlack(sideDatas[TILE_SIDE.PY].albedoData, 11), isBlack(sideDatas[TILE_SIDE.PY].albedoData, 7), isBlack(sideDatas[TILE_SIDE.PY].albedoData, 3),
+			isBlack(sideDatas[TILE_SIDE.NY].albedoData, 3), isBlack(sideDatas[TILE_SIDE.NY].albedoData, 7), isBlack(sideDatas[TILE_SIDE.NY].albedoData, 11), isBlack(sideDatas[TILE_SIDE.PY].albedoData, 15),
+		];
+
+		for (const y of range(height)) {
+			for (const x of range(width)) {
+				const texIndex = y * width + x;
+				const xSide = x < width / 2
+					? TILE_SIDE.NX
+					: TILE_SIDE.PX;
+				const ySide = y < height / 2
+					? TILE_SIDE.PY
+					: TILE_SIDE.NY;
+				const texX = x < width / 2
+					? y
+					: height - (y + 2);
+				const texY = y < height / 2
+					? width - (x + 1)
+					: x - 1;
+				const gridX = Math.floor(texX / gridInterval);
+				const gridY = Math.floor(texY / gridInterval);
+				const gridOffsetX = (texX + 1) % gridInterval;
+				const gridOffsetY = (texY + 1) % gridInterval;
+				const albedoX = sideDatas[xSide].albedoData.slice(3 * texX, 3 * texX + 3);
+				const albedoY = sideDatas[ySide].albedoData.slice(3 * texY, 3 * texY + 3);
+
+				if (x === 0 || y === height - 1) {
+					albedoData[3 * texIndex + 0] = 0;
+					albedoData[3 * texIndex + 1] = 0;
+					albedoData[3 * texIndex + 2] = 0;
+				} else {
+					albedoData[3 * texIndex + 0] = 255;
+					albedoData[3 * texIndex + 1] = 255;
+					albedoData[3 * texIndex + 2] = 255;
+				}
+			}
+		}
+
+		return {
+			albedoData,
+			displacementData,
+			aoData,
+			normalData,
+		};
+	}
+
+	private _generateSideData(side: TILE_SIDE, width: number, height: number): {
+		albedoData: Uint8Array,
+		displacementData: Uint8Array,
+		aoData: Float32Array,
+		normalData: Float32Array,
+	} {
+		const map = this._map;
+		const tilePos = this._tilePos;
+		const gridInterval = GRID_INTERVAL;
 		const textureSize = width * height;
 
 		// Possible horizontal tile patterns
@@ -263,12 +403,12 @@ export default class StoneWallTexturePack {
 			}
 		}
 
-		this._albedo = new THREE.DataTexture(albedoData, width, height, THREE.RGBFormat, THREE.UnsignedByteType);
-		this._displacement = new THREE.DataTexture(displacementData, width, height, THREE.RGBFormat, THREE.UnsignedByteType);
-		this._ao = new THREE.DataTexture(aoData, width, height, THREE.RedFormat, THREE.FloatType);
-		this._normal = new THREE.DataTexture(normalData, width, height, THREE.RGBAFormat, THREE.FloatType);
-
-		this._albedo.flipY = true;
+		return {
+			albedoData,
+			displacementData,
+			aoData,
+			normalData,
+		};
 	}
 
 	private _tileIndexAt(pos: THREE.Vector3, mapSize: number[]) {

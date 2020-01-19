@@ -1,14 +1,10 @@
 import * as THREE from "three";
 
 import Entity from "./Entity";
-import vertexTopShader from "@/shader/tile-top.vs";
-import vertexSideShader from "@/shader/tile-side.vs";
-import fragTopShader from "@/shader/tile-top.fs";
-import fragSideShader from "@/shader/tile-side.fs";
-import PaletteTexture from "@/palette/PaletteTexture";
+import vertexShader from "@/shader/tile.vs";
+import fragmentShader from "@/shader/tile.fs";
 import Map from "@/map/Map";
 import StoneWallTexturePack from "@/texgen/StoneWallTexturePack";
-import * as COLORS from "@/palette/colors";
 import { TILE_SIDE } from "@/const";
 
 const depthModifier = 2 / Math.sqrt(3);
@@ -119,40 +115,45 @@ export default class Tile implements Entity {
 	public update(ms: number) {}
 
 	private _createTopMaterial(map: Map) {
-		return new THREE.RawShaderMaterial({
-			uniforms: {
-				uTex: new THREE.Uniform(
-					new THREE.TextureLoader().load("./textures/stone_top.png", tex => {
-						tex.minFilter = THREE.NearestFilter;
-						tex.magFilter = THREE.NearestFilter;
-						tex.generateMipmaps = false;
-					}),
-				),
-				uPaletteTex: new THREE.Uniform(
-					PaletteTexture.get(COLORS.STONE_BRICK),
-				),
-			},
-			vertexShader: vertexTopShader,
-			fragmentShader: fragTopShader,
-		});
-	}
+		const texturePack = new StoneWallTexturePack(this.pos, map);
+		const textures = texturePack.generateTop();
 
-	private _createSideMaterial(map: Map, side: TILE_SIDE) {
-		const texturePack = new StoneWallTexturePack(side, this.pos, map);
 		const uniforms = THREE.UniformsUtils.merge([
 			THREE.UniformsLib.lights,
 			{
-				albedoMap: new THREE.Uniform(texturePack.albedoMap),
-				displacementMap: new THREE.Uniform(texturePack.displacementMap),
-				aoMap: new THREE.Uniform(texturePack.aoMap),
-				normalMap: new THREE.Uniform(texturePack.normalMap),
+				albedoMap: new THREE.Uniform(textures.albedoMap),
+				displacementMap: new THREE.Uniform(textures.displacementMap),
+				aoMap: new THREE.Uniform(textures.aoMap),
+				normalMap: new THREE.Uniform(textures.normalMap),
 			},
 		]);
 
 		return new THREE.RawShaderMaterial({
-			uniforms: uniforms,
-			vertexShader: vertexSideShader,
-			fragmentShader: fragSideShader,
+			uniforms,
+			vertexShader,
+			fragmentShader,
+			lights: true,
+		});
+	}
+
+	private _createSideMaterial(map: Map, side: TILE_SIDE) {
+		const texturePack = new StoneWallTexturePack(this.pos, map);
+		const textures = texturePack.generateSide(side);
+
+		const uniforms = THREE.UniformsUtils.merge([
+			THREE.UniformsLib.lights,
+			{
+				albedoMap: new THREE.Uniform(textures.albedoMap),
+				displacementMap: new THREE.Uniform(textures.displacementMap),
+				aoMap: new THREE.Uniform(textures.aoMap),
+				normalMap: new THREE.Uniform(textures.normalMap),
+			},
+		]);
+
+		return new THREE.RawShaderMaterial({
+			uniforms,
+			vertexShader,
+			fragmentShader,
 			lights: true,
 		});
 	}
