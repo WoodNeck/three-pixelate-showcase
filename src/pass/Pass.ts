@@ -1,6 +1,6 @@
 import * as THREE from "three";
 
-import { Updateable } from "@/type";
+import { Updateable } from "@/type/common";
 
 export default interface Pass extends Updateable {
 	readonly shouldSwap: boolean;

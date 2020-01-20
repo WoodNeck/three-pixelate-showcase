@@ -3,9 +3,8 @@ import * as THREE from "three";
 import Entity from "./Entity";
 import vertexShader from "@/shader/tile.vs";
 import fragmentShader from "@/shader/tile.fs";
-import Map from "@/map/Map";
-import StoneWallTexturePack from "@/texgen/StoneWallTexturePack";
-import { TILE_SIDE } from "@/const";
+import { DIRECTION } from "@/const/common";
+import { TexturePack } from "@/type/common";
 
 const depthModifier = 2 / Math.sqrt(3);
 const widthModifier = 2 * Math.SQRT2;
@@ -18,77 +17,53 @@ export default class Tile implements Entity {
 	constructor(
 		public readonly pos: THREE.Vector3,
 		planeVisibility: boolean[],
-		map: Map,
+		texturePacks: TexturePack[],
 	) {
-		let visiblePlaneCount = 0;
 		const mergedGeometry = new THREE.Geometry();
-		const materials = planeVisibility.map((visible, idx) => {
+		let visibleIndex = 0;
+		planeVisibility.forEach((visible, idx) => {
 			if (!visible) return;
 
 			let geometry!: THREE.PlaneGeometry;
-			let material!: THREE.RawShaderMaterial;
-
 			switch (idx) {
-				case 0:
-					// +X
+				case DIRECTION.PX:
+				case DIRECTION.NX:
+				case DIRECTION.PY:
+				case DIRECTION.NY:
 					geometry = new THREE.PlaneGeometry(widthModifier, depthModifier);
-					material = this._createSideMaterial(map, TILE_SIDE.PX);
 					break;
-				case 1:
-					// -X
-					geometry = new THREE.PlaneGeometry(widthModifier, depthModifier);
-					material = this._createSideMaterial(map, TILE_SIDE.NX);
-					break;
-				case 2:
-					// +Y
-					geometry = new THREE.PlaneGeometry(widthModifier, depthModifier);
-					material = this._createSideMaterial(map, TILE_SIDE.PY);
-					break;
-				case 3:
-					// -Y
-					geometry = new THREE.PlaneGeometry(widthModifier, depthModifier);
-					material = this._createSideMaterial(map, TILE_SIDE.NY);
-					break;
-				case 4:
-				case 5:
-					// Z
+				case DIRECTION.PZ:
+				case DIRECTION.NZ:
 					geometry = new THREE.PlaneGeometry(widthModifier, widthModifier);
-					material = this._createTopMaterial(map);
 					break;
 			}
 
-			const mesh = new THREE.Mesh(geometry!, material!);
+			const mesh = new THREE.Mesh(geometry);
 
 			switch (idx) {
-				case 0:
-					// +X
+				case DIRECTION.PX:
 					mesh.rotateX(THREE.Math.DEG2RAD * 90);
 					mesh.rotateY(THREE.Math.DEG2RAD * 90);
 					mesh.translateZ(widthModifier / 2);
 					break;
-				case 1:
-					// -X
+				case DIRECTION.NX:
 					mesh.rotateX(THREE.Math.DEG2RAD * 90);
 					mesh.rotateY(-THREE.Math.DEG2RAD * 90);
 					mesh.translateZ(widthModifier / 2);
 					break;
-				case 2:
-					// +Y
+				case DIRECTION.PY:
 					mesh.rotateX(THREE.Math.DEG2RAD * 90);
 					mesh.rotateY(-THREE.Math.DEG2RAD * 180);
 					mesh.translateZ(widthModifier / 2);
 					break;
-				case 3:
-					// -Y
+				case DIRECTION.NY:
 					mesh.rotateX(THREE.Math.DEG2RAD * 90);
 					mesh.translateZ(widthModifier / 2);
 					break;
-				case 4:
-					// +Z
+				case DIRECTION.PZ:
 					mesh.translateZ(depthModifier / 2);
 					break;
-				case 5:
-					// -Z
+				case DIRECTION.NZ:
 					mesh.rotateX(THREE.Math.DEG2RAD * 180);
 					mesh.translateZ(depthModifier / 2);
 					break;
@@ -96,11 +71,14 @@ export default class Tile implements Entity {
 
 			mesh.updateMatrix();
 
-			mergedGeometry.merge(mesh!.geometry as THREE.Geometry, mesh!.matrix, visiblePlaneCount);
-			visiblePlaneCount += 1;
+			mergedGeometry.merge(mesh.geometry as THREE.Geometry, mesh.matrix, visibleIndex);
+			visibleIndex += 1;
+		});
 
-			return material!;
-		}).filter(val => !!val);
+		const materials = planeVisibility.map((visible, idx) => {
+			if (!visible) return;
+			return this._createMaterial(texturePacks[idx]);
+		}).filter(val => val);
 
 		this._mesh = new THREE.Mesh(mergedGeometry, materials as THREE.RawShaderMaterial[]);
 		this._mesh.position.add(
@@ -114,39 +92,14 @@ export default class Tile implements Entity {
 
 	public update(ms: number) {}
 
-	private _createTopMaterial(map: Map) {
-		const texturePack = new StoneWallTexturePack(this.pos, map);
-		const textures = texturePack.generateTop();
-
+	private _createMaterial(texturePack: TexturePack) {
 		const uniforms = THREE.UniformsUtils.merge([
 			THREE.UniformsLib.lights,
 			{
-				albedoMap: new THREE.Uniform(textures.albedoMap),
-				displacementMap: new THREE.Uniform(textures.displacementMap),
-				aoMap: new THREE.Uniform(textures.aoMap),
-				normalMap: new THREE.Uniform(textures.normalMap),
-			},
-		]);
-
-		return new THREE.RawShaderMaterial({
-			uniforms,
-			vertexShader,
-			fragmentShader,
-			lights: true,
-		});
-	}
-
-	private _createSideMaterial(map: Map, side: TILE_SIDE) {
-		const texturePack = new StoneWallTexturePack(this.pos, map);
-		const textures = texturePack.generateSide(side);
-
-		const uniforms = THREE.UniformsUtils.merge([
-			THREE.UniformsLib.lights,
-			{
-				albedoMap: new THREE.Uniform(textures.albedoMap),
-				displacementMap: new THREE.Uniform(textures.displacementMap),
-				aoMap: new THREE.Uniform(textures.aoMap),
-				normalMap: new THREE.Uniform(textures.normalMap),
+				albedoMap: new THREE.Uniform(texturePack.albedoMap),
+				displacementMap: new THREE.Uniform(texturePack.displacementMap),
+				aoMap: new THREE.Uniform(texturePack.aoMap),
+				normalMap: new THREE.Uniform(texturePack.normalMap),
 			},
 		]);
 

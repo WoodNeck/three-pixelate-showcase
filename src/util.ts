@@ -1,4 +1,4 @@
-import { Vec3 } from "./type";
+import { Vec3 } from "./type/common";
 
 export function* range(end: number) {
 	let n = 0;
@@ -30,9 +30,12 @@ export function parseColorHex(col: string): Vec3 {
 }
 
 // mulberry32
-export function random(seed: number) {
-	const a = seed + 1831565813 | 0;
-	let t = Math.imul(a ^ a >>> 15, 1 | a);
-	t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
-	return ((t ^ t >>> 14) >>> 0) / (2 ** 32);
+export function random() {
+	let a = 0;
+	return (() => {
+		a += 1831565813;
+		let t = Math.imul(a ^ a >>> 15, 1 | a);
+		t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+		return ((t ^ t >>> 14) >>> 0) / (2 ** 32);
+	})();
 }

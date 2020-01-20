@@ -2,7 +2,7 @@ import * as THREE from "three";
 
 import EntityManager from "@/EntityManager";
 import Entity from "@/entity/Entity";
-import { Updateable } from "@/type";
+import { Updateable } from "@/type/common";
 
 export default abstract class Layer implements Updateable {
 	public abstract get scene(): Readonly<THREE.Scene>;

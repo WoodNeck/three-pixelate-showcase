@@ -1,35 +1,51 @@
 import * as THREE from "three";
 
-import Map from "@/map/Map";
+import TileMap from "@/map/TileMap";
+import StoneWallStrategy from "./strategy/StoneWallStrategy";
 import { range, random, parseColorHex } from "@/util";
-import { TILE_SIDE } from "@/const";
+import { DIRECTION } from "@/const/common";
+import * as TEXTURE from "@/const/texture";
 import * as COLORS from "@/palette/colors";
-
-const TOP_WIDTH = 16;
-const TOP_HEIGHT = 16;
-const SIDE_WIDTH = 16;
-const SIDE_HEIGHT = 8;
-const GRID_INTERVAL = 4;
+import { TexturePack, Palette, Vec3 } from "@/type/common";
+import { Brick } from "@/type/texture";
 
 // Procedually generated stone wall texture
-export default class StoneWallTexturePack {
-	private _map: Map;
-	private _tilePos: THREE.Vector3;
+export default class StoneWallGenerator {
+	private _map: TileMap;
+	private _bricks: Map<number, Brick>;
+	private _palette: Vec3[];
+	private _strategy: StoneWallStrategy;
 
-	constructor(
-		tilePos: THREE.Vector3,
-		map: Map,
-	) {
-		this._tilePos = tilePos;
+	constructor(map: TileMap, palette: Palette) {
 		this._map = map;
+		this._bricks = new Map();
+		this._strategy = new StoneWallStrategy();
+		this._palette = palette.colors.map(hex => parseColorHex(hex));
 	}
 
-	public generateTop(): {
-		albedoMap: THREE.DataTexture,
-		displacementMap: THREE.DataTexture,
-		aoMap: THREE.DataTexture,
-		normalMap: THREE.DataTexture,
-	} {
+	public prepare(x: number, y: number, z: number) {
+		const strategy = this._strategy;
+		const bricks = this._bricks;
+
+		const brick = strategy.createBrick({
+			map: this._map,
+			pos: [x, y, z],
+			palette: this._palette,
+			neighbors: {
+				[DIRECTION.NX]: bricks.get(this._tileIndexAt(x - 1, y, z)),
+				[DIRECTION.NY]: bricks.get(this._tileIndexAt(x, y - 1, z)),
+				[DIRECTION.NZ]: bricks.get(this._tileIndexAt(x, y, z - 1)),
+			},
+		});
+
+		bricks.set(this._tileIndexAt(x, y, z), brick);
+	}
+
+	public generate(side: DIRECTION): TexturePack {
+
+	}
+
+	public generateTop(): TexturePack {
 		const width = TOP_WIDTH;
 		const height = TOP_HEIGHT;
 		const topData = this._generateTopData(width, height);
@@ -52,14 +68,9 @@ export default class StoneWallTexturePack {
 		};
 	}
 
-	public generateSide(side: TILE_SIDE): {
-		albedoMap: THREE.DataTexture,
-		displacementMap: THREE.DataTexture,
-		aoMap: THREE.DataTexture,
-		normalMap: THREE.DataTexture,
-	} {
-		const width = SIDE_WIDTH;
-		const height = SIDE_HEIGHT;
+	public generateSide(side: DIRECTION): TexturePack {
+		const width = TEXTURE.SIDE.WIDTH;
+		const height = TEXTURE.SIDE.HEIGHT;
 		const sideData = this._generateSideData(side, width, height);
 
 		const albedoMap = new THREE.DataTexture(sideData.albedoData, width, height, THREE.RGBFormat, THREE.UnsignedByteType);
@@ -91,7 +102,7 @@ export default class StoneWallTexturePack {
 		const gridInterval = GRID_INTERVAL;
 		const textureSize = width * height;
 
-		const sideDatas = [TILE_SIDE.PX, TILE_SIDE.NX, TILE_SIDE.PY, TILE_SIDE.NY].map(side => {
+		const sideDatas = [DIRECTION.PX, DIRECTION.NX, DIRECTION.PY, DIRECTION.NY].map(side => {
 			return this._generateSideData(side, SIDE_WIDTH, SIDE_HEIGHT);
 		});
 
@@ -111,44 +122,49 @@ export default class StoneWallTexturePack {
 				&& data[3 * idx + 1] === 0
 				&& data[3 * idx + 2] === 0;
 		};
-		const gridX = [
-			isBlack(sideDatas[TILE_SIDE.PY].albedoData, 15), isBlack(sideDatas[TILE_SIDE.PY].albedoData, 11), isBlack(sideDatas[TILE_SIDE.PY].albedoData, 7), isBlack(sideDatas[TILE_SIDE.PY].albedoData, 3),
-			isBlack(sideDatas[TILE_SIDE.PY].albedoData, 15), isBlack(sideDatas[TILE_SIDE.PY].albedoData, 11), isBlack(sideDatas[TILE_SIDE.PY].albedoData, 7), isBlack(sideDatas[TILE_SIDE.PY].albedoData, 3),
-			isBlack(sideDatas[TILE_SIDE.PY].albedoData, 15), isBlack(sideDatas[TILE_SIDE.PY].albedoData, 11), isBlack(sideDatas[TILE_SIDE.PY].albedoData, 7), isBlack(sideDatas[TILE_SIDE.PY].albedoData, 3),
-			isBlack(sideDatas[TILE_SIDE.NY].albedoData, 3), isBlack(sideDatas[TILE_SIDE.NY].albedoData, 7), isBlack(sideDatas[TILE_SIDE.NY].albedoData, 11), isBlack(sideDatas[TILE_SIDE.PY].albedoData, 15),
-		];
 
 		for (const y of range(height)) {
 			for (const x of range(width)) {
 				const texIndex = y * width + x;
 				const xSide = x < width / 2
-					? TILE_SIDE.NX
-					: TILE_SIDE.PX;
+					? DIRECTION.NX
+					: DIRECTION.PX;
 				const ySide = y < height / 2
-					? TILE_SIDE.PY
-					: TILE_SIDE.NY;
+					? DIRECTION.PY
+					: DIRECTION.NY;
 				const texX = x < width / 2
 					? y
 					: height - (y + 2);
 				const texY = y < height / 2
 					? width - (x + 1)
 					: x - 1;
-				const gridX = Math.floor(texX / gridInterval);
-				const gridY = Math.floor(texY / gridInterval);
+				const gridX = Math.floor(x / gridInterval);
+				const gridY = Math.floor(y / gridInterval);
 				const gridOffsetX = (texX + 1) % gridInterval;
 				const gridOffsetY = (texY + 1) % gridInterval;
 				const albedoX = sideDatas[xSide].albedoData.slice(3 * texX, 3 * texX + 3);
 				const albedoY = sideDatas[ySide].albedoData.slice(3 * texY, 3 * texY + 3);
 
-				if (x === 0 || y === height - 1) {
-					albedoData[3 * texIndex + 0] = 0;
-					albedoData[3 * texIndex + 1] = 0;
-					albedoData[3 * texIndex + 2] = 0;
+				if (gridOffsetX === 0) {
+					albedoData[3 * texIndex + 0] = albedoX[0];
+					albedoData[3 * texIndex + 1] = albedoX[1];
+					albedoData[3 * texIndex + 2] = albedoX[2];
+				} else if (gridOffsetY === 0) {
+					albedoData[3 * texIndex + 0] = albedoY[0];
+					albedoData[3 * texIndex + 1] = albedoY[1];
+					albedoData[3 * texIndex + 2] = albedoY[2];
 				} else {
-					albedoData[3 * texIndex + 0] = 255;
-					albedoData[3 * texIndex + 1] = 255;
-					albedoData[3 * texIndex + 2] = 255;
+					if ((gridX < 2 && gridY < 2) || (gridX >= 2 && gridY >= 2)) {
+						albedoData[3 * texIndex + 0] = albedoY[0];
+						albedoData[3 * texIndex + 1] = albedoY[1];
+						albedoData[3 * texIndex + 2] = albedoY[2];
+					} else {
+						albedoData[3 * texIndex + 0] = albedoX[0];
+						albedoData[3 * texIndex + 1] = albedoX[1];
+						albedoData[3 * texIndex + 2] = albedoX[2];
+					}
 				}
+
 			}
 		}
 
@@ -160,7 +176,7 @@ export default class StoneWallTexturePack {
 		};
 	}
 
-	private _generateSideData(side: TILE_SIDE, width: number, height: number): {
+	private _generateSideData(side: DIRECTION, width: number, height: number): {
 		albedoData: Uint8Array,
 		displacementData: Uint8Array,
 		aoData: Float32Array,
@@ -171,15 +187,7 @@ export default class StoneWallTexturePack {
 		const gridInterval = GRID_INTERVAL;
 		const textureSize = width * height;
 
-		// Possible horizontal tile patterns
-		// This patterns ensures that there're no block that has width more than 8
-		const patterns = [
-			[false, true, false],
-			[true, true, false],
-			[false, true, true],
-			[true, false, true],
-			[true, true, true],
-		];
+
 
 		const albedoData = new Uint8Array(3 * textureSize); // 0 ~ 255
 		const displacementData = new Uint8Array(3 * textureSize); // 0 ~ 255
@@ -193,27 +201,27 @@ export default class StoneWallTexturePack {
 		const prevTilePos = tilePos.clone();
 		const nextTilePos = tilePos.clone();
 		switch (side) {
-			case TILE_SIDE.PX:
-				cwSide = TILE_SIDE.NY;
-				ccwSide = TILE_SIDE.PY;
+			case DIRECTION.PX:
+				cwSide = DIRECTION.NY;
+				ccwSide = DIRECTION.PY;
 				prevTilePos.setY(prevTilePos.y - 1);
 				nextTilePos.setY(nextTilePos.y + 1);
 				break;
-			case TILE_SIDE.NX:
-				cwSide = TILE_SIDE.PY;
-				ccwSide = TILE_SIDE.NY;
+			case DIRECTION.NX:
+				cwSide = DIRECTION.PY;
+				ccwSide = DIRECTION.NY;
 				prevTilePos.setY(prevTilePos.y + 1);
 				nextTilePos.setY(nextTilePos.y - 1);
 				break;
-			case TILE_SIDE.PY:
-				cwSide = TILE_SIDE.PX;
-				ccwSide = TILE_SIDE.NX;
+			case DIRECTION.PY:
+				cwSide = DIRECTION.PX;
+				ccwSide = DIRECTION.NX;
 				prevTilePos.setX(prevTilePos.x + 1);
 				nextTilePos.setX(nextTilePos.x - 1);
 				break;
-			case TILE_SIDE.NY:
-				cwSide = TILE_SIDE.NX;
-				ccwSide = TILE_SIDE.PX;
+			case DIRECTION.NY:
+				cwSide = DIRECTION.NX;
+				ccwSide = DIRECTION.PX;
 				prevTilePos.setX(prevTilePos.x - 1);
 				nextTilePos.setX(nextTilePos.x + 1);
 				break;
@@ -254,7 +262,7 @@ export default class StoneWallTexturePack {
 		];
 
 		// Colors for each grid
-		const palette = COLORS.ENDESGA16;
+		const palette = COLORS.ICE_CREAM_GB;
 		const paletteLength = palette.colors.length;
 		const chosenColors = [...range(8)].map(idx => {
 			return parseColorHex(palette.colors[this._randomValAt(side, tilePos, idx, paletteLength)]);
@@ -276,16 +284,16 @@ export default class StoneWallTexturePack {
 		// Height of map grid that can block this stone block's last horizontal grid
 		let blockingGridHeight: number = 0;
 		switch (side) {
-			case TILE_SIDE.PX:
+			case DIRECTION.PX:
 				blockingGridHeight = map.getHeightAt(tilePos.x + 1, tilePos.y + 1);
 				break;
-			case TILE_SIDE.NX:
+			case DIRECTION.NX:
 				blockingGridHeight = map.getHeightAt(tilePos.x - 1, tilePos.y - 1);
 				break;
-			case TILE_SIDE.PY:
+			case DIRECTION.PY:
 				blockingGridHeight = map.getHeightAt(tilePos.x - 1, tilePos.y + 1);
 				break;
-			case TILE_SIDE.NY:
+			case DIRECTION.NY:
 				blockingGridHeight = map.getHeightAt(tilePos.x + 1, tilePos.y - 1);
 				break;
 		}
@@ -358,7 +366,7 @@ export default class StoneWallTexturePack {
 				} else {
 					let chosenColor = chosenColors[gridY * 4 + gridX];
 
-					if (tilePos.x === 0 && tilePos.y === 0 && tilePos.z === 0 && side === TILE_SIDE.NX && gridX === 2 && gridY === 0) {
+					if (tilePos.x === 0 && tilePos.y === 0 && tilePos.z === 0 && side === DIRECTION.NX && gridX === 2 && gridY === 0) {
 						const nextColors = hasNextTile
 							? chosenNextColors
 							: chosenCCWColors;
@@ -411,16 +419,37 @@ export default class StoneWallTexturePack {
 		};
 	}
 
-	private _tileIndexAt(pos: THREE.Vector3, mapSize: number[]) {
-		return pos.x + pos.y * mapSize[0] + pos.z * mapSize[0] * mapSize[1];
+	private _getPattern(x: number, y: number, z: number, side: DIRECTION) {
+		const selectedPatterns = this._selectedPatterns;
+		const tileIndex = this._tileIndexAt(x, y, z, side);
+
+		if (selectedPatterns.has(tileIndex)) {
+			return selectedPatterns.get(tileIndex);
+		} else {
+			const patterns = TEXTURE.STONE_WALL.PATTERNS;
+			const topSeed = this._randomSeedAt(tileIndex, TEXTURE.STONE_WALL.SIDE.TOP);
+			const btmSeed = this._randomSeedAt(tileIndex, TEXTURE.STONE_WALL.SIDE.BOTTOM);
+			const topPattern = patterns[this._randomInt(topSeed, patterns.length)];
+			const btmPattern = patterns[this._randomInt(btmSeed, patterns.length)];
+
+			selectedPatterns.set(tileIndex, {
+				[TEXTURE.STONE_WALL.SIDE.TOP]: topPattern,
+				[TEXTURE.STONE_WALL.SIDE.BOTTOM]: btmPattern,
+			});
+		}
 	}
 
-	private _randomSeedAt(side: TILE_SIDE, tileIndex: number, offset: number) {
-		return 32 * tileIndex + 8 * side + offset;
+	private _tileIndexAt(x: number, y: number, z: number) {
+		const mapSize = this._map.size;
+		return x + y * mapSize[0] + z * mapSize[0] * mapSize[1];
 	}
 
-	private _randomValAt(side: TILE_SIDE, pos: THREE.Vector3, offset: number, max: number) {
-		const tileIndex = this._tileIndexAt(pos, this._map.mapSize);
-		return Math.floor(random(this._randomSeedAt(side, tileIndex, offset)) * max);
+	private _randomInt(seed: number, max: number) {
+		return Math.floor(random(seed) * max);
+	}
+
+	private _randomSeedAt(tileIndex: number, offset: number) {
+		if (offset >= 8) throw new Error("Offset can't be same or bigger than 8");
+		return 8 * tileIndex + offset;
 	}
 }

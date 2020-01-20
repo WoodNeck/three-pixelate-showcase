@@ -1,7 +1,7 @@
 import * as THREE from "three";
 
 import { range, luma, parseColorHex } from "@/util";
-import { Palette, Vec3 } from "@/type";
+import { Palette, Vec3 } from "@/type/common";
 
 const textures: Map<string, THREE.DataTexture> = new Map();
 

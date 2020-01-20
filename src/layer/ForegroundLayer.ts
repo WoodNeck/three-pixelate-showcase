@@ -4,7 +4,6 @@ import Layer from "./Layer";
 import EffectPlane from "@/entity/EffectPlane";
 import ditherVS from "@/shader/dither.vs";
 import ditherFS from "@/shader/dither.fs";
-import StoneWallTexturePack from "@/texgen/StoneWallTexturePack";
 
 export default class ForegroundLayer extends Layer {
 	private _scene: THREE.Scene;

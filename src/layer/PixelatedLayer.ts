@@ -1,14 +1,13 @@
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import Layer from "./Layer";
-import Map from "../map/Map";
+import MapLoader from "../map/MapLoader";
 import cellVS from "../shader/cell.vs";
 import cellFS from "../shader/cell.fs";
 
 export default class PixelatedLayer extends Layer {
 	private _scene: THREE.Scene;
 	private _camera: THREE.OrthographicCamera;
-	private _map: Map;
 	private _sun: THREE.DirectionalLight;
 	private _pixelPerUnit: number = 8;
 
@@ -28,8 +27,6 @@ export default class PixelatedLayer extends Layer {
 
 		// const viewDir = new THREE.Vector3(0, 0, -1).applyQuaternion(this._camera.quaternion);
 		// this._camera.position.add(viewDir.multiplyScalar(-30));
-
-		this._map = new Map();
 
 		this._sun = new THREE.DirectionalLight(new THREE.Color("#fff"), 2);
 
@@ -82,8 +79,10 @@ export default class PixelatedLayer extends Layer {
 		camera.updateProjectionMatrix();
 	}
 
-	private _constructScene() {
-		this._map.tiles.forEach(tiles => {
+	private async _constructScene() {
+		const mapData = await new MapLoader().load("qadriga");
+
+		mapData.tiles.forEach(tiles => {
 			tiles.forEach(tile => this.add(tile));
 		});
 
