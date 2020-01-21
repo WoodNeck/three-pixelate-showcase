@@ -9,8 +9,12 @@ export default class StoneWallStrategy {
 		const { map, pos, palette, neighbors } = ctx;
 		const [x, y, z] = pos;
 
-		const isLastX = x + 1 === map.size[0];
-		const isLastY = y + 1 === map.size[1];
+		const isLastX = x + 1 === map.size[0]
+			|| z >= map.getHeight(x + 1, y)
+			|| z < map.getHeight(x + 1, y - 1);
+		const isLastY = y + 1 === map.size[1]
+			|| z >= map.getHeight(x, y + 1)
+			|| z < map.getHeight(x + 1, y + 1);
 		const isToppest = z + 1 === map.getHeight(x, y);
 		const bottomNeighbors = {
 			[DIRECTION.NX]: neighbors[DIRECTION.NX] && neighbors[DIRECTION.NX]![BRICK_FLOOR.BOTTOM],
@@ -75,15 +79,15 @@ export default class StoneWallStrategy {
 					? neighbors[DIRECTION.NZ]![x][y]
 					: null;
 
-				const connectedNX = !!nxVoxel && nxVoxel.connection[DIRECTION.PX];
+				let connectedNX = !!nxVoxel && nxVoxel.connection[DIRECTION.PX];
 				const connectedNY = !!nyVoxel && nyVoxel.connection[DIRECTION.PY];
 				const connectedPZ = false;
 				const randomX = random();
 				const randomY = random();
 				const randomZ = random();
 
-				let connectedPX = !isLastX && randomX < 0.5;
-				let connectedPY = !isLastY && randomY < 0.5;
+				let connectedPX = !(isLastX && x === width - 1) && randomX < 0.5;
+				let connectedPY = !(isLastY && y === height - 1) && randomY < 0.5;
 				let connectedNZ = !nzVoxel || nzVoxel.connection[DIRECTION.NZ]
 					? false
 					: nzVoxel.connection[DIRECTION.NX] !== connectedNX || nzVoxel.connection[DIRECTION.NY] !== connectedNY
@@ -92,10 +96,20 @@ export default class StoneWallStrategy {
 				let color = palette[Math.floor(random() * palette.length)];
 
 				if (connectedNX && connectedNY) {
-					connectedPX = false;
-					connectedPY = false;
-					connectedNZ = nxVoxel!.connection[DIRECTION.NZ];
-					color = nxVoxel!.color; // = downVoxel!.color
+					if (nxVoxel!.connection[DIRECTION.NY] && nyVoxel!.connection[DIRECTION.NX]) {
+						connectedPX = false;
+						connectedPY = false;
+						connectedNZ = nxVoxel!.connection[DIRECTION.NZ];
+						color = nxVoxel!.color; // = downVoxel!.color
+					} else {
+						connectedPX = nyVoxel!.connection[DIRECTION.PX];
+						connectedPY = false;
+						connectedNZ = nyVoxel!.connection[DIRECTION.NZ];
+						color = nyVoxel!.color;
+
+						connectedNX = false;
+						nxVoxel!.connection[DIRECTION.PX] = false;
+					}
 				} else if (connectedNX) {
 					connectedPX = false;
 					connectedPY = nxVoxel!.connection[DIRECTION.PY];

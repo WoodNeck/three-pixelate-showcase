@@ -101,12 +101,43 @@ export default class StoneWallGenerator {
 	} {
 		const width = TEXTURE.SIZE.TOP.WIDTH;
 		const height = TEXTURE.SIZE.TOP.HEIGHT;
+		const gridInterval = TEXTURE.GRID_INTERVAL;
+		const gridWidth = width / gridInterval;
+		const gridHeight = height / gridInterval;
 		const textureSize = width * height;
 
 		const albedoData = new Uint8Array(3 * textureSize); // 0 ~ 255
 		const displacementData = new Uint8Array(3 * textureSize); // 0 ~ 255
 		const aoData = new Float32Array(textureSize); // 0 ~ 1
 		const normalData = new Float32Array(4 * textureSize); // 0 ~ 1
+
+		const topBricks = this._bricks.get(this._tileIndexAt(x, y, z))![TEXTURE.BRICK_FLOOR.TOP];
+
+		for (const texX of range(width)) {
+			for (const texY of range(height)) {
+				const gridX = Math.floor(texX / gridInterval);
+				const gridY = Math.floor(texY / gridInterval);
+				const gridOffsetX = texX % gridInterval;
+				const gridOffsetY = texY % gridInterval;
+				const texelIndex = texX + texY * width;
+
+				const voxel = topBricks[gridX][gridHeight - gridY - 1];
+
+				if (gridOffsetX === 0 && !voxel.connection[DIRECTION.NX]) {
+					albedoData[3 * texelIndex + 0] = 0;
+					albedoData[3 * texelIndex + 1] = 0;
+					albedoData[3 * texelIndex + 2] = 0;
+				} else if (gridOffsetY === gridInterval - 1 && !voxel.connection[DIRECTION.NY]) {
+					albedoData[3 * texelIndex + 0] = 0;
+					albedoData[3 * texelIndex + 1] = 0;
+					albedoData[3 * texelIndex + 2] = 0;
+				} else {
+					albedoData[3 * texelIndex + 0] = voxel.color[0];
+					albedoData[3 * texelIndex + 1] = voxel.color[1];
+					albedoData[3 * texelIndex + 2] = voxel.color[2];
+				}
+			}
+		}
 
 		return {
 			albedoData,

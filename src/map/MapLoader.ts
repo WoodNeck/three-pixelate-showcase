@@ -28,7 +28,7 @@ export default class MapLoader {
 		const mapY = mapSize[1];
 		const map = new TileMap(mapSize, heights);
 
-		const stoneWallTextureGenerator = new StoneWallTexturePack(map, COLORS.SWEETIE16);
+		const stoneWallTextureGenerator = new StoneWallTexturePack(map, COLORS.ICE_CREAM_GB);
 
 		for (const y of range(mapY)) {
 			for (const x of range(mapX)) {
