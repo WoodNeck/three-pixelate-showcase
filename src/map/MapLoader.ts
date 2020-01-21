@@ -11,8 +11,8 @@ import { TILE_TYPES } from "@/const/common";
 import { TexturePack } from "@/type/common";
 
 export default class MapLoader {
-	public async load(mapName: string) {
-		const mapCSV = await import(/* webpackMode: "eager" */ `./${mapName}.csv`) as string;
+	public async load(mapName: string): Promise<TileMap> {
+		const mapCSV = await import(/* webpackMode: "eager" */ `./${mapName}.csv`).then(val => val.default) as string;
 
 		// Load map
 		const mapInfo = parse(mapCSV, {
@@ -66,8 +66,8 @@ export default class MapLoader {
 					const texturePacks = planeVisibility.map((visible, direction) => {
 						if (!visible) return;
 
-						return generator.generate(direction);
-					}).filter(val => val) as TexturePack[];
+						return generator.generate(x, y, z, direction);
+					});
 
 					stack.set(z, new Tile(new THREE.Vector3(x, y, z), planeVisibility, texturePacks));
 				}

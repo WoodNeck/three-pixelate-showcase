@@ -1,9 +1,10 @@
 import * as THREE from "three";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import Layer from "./Layer";
 import MapLoader from "../map/MapLoader";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import cellVS from "../shader/cell.vs";
 import cellFS from "../shader/cell.fs";
+import { range } from "@/util";
 
 export default class PixelatedLayer extends Layer {
 	private _scene: THREE.Scene;
@@ -80,11 +81,18 @@ export default class PixelatedLayer extends Layer {
 	}
 
 	private async _constructScene() {
-		const mapData = await new MapLoader().load("qadriga");
+		const map = await new MapLoader().load("qadriga");
+		const mapSize = map.size;
 
-		mapData.tiles.forEach(tiles => {
-			tiles.forEach(tile => this.add(tile));
-		});
+		for (const x of range(mapSize[0])) {
+			for (const y of range(mapSize[1])) {
+				const stack = map.get(x, y);
+
+				for (const z of range(stack.height)) {
+					this.add(stack.get(z));
+				}
+			}
+		}
 
 		// const geometry = new THREE.TorusKnotGeometry(3);
 		// const material = new THREE.RawShaderMaterial({

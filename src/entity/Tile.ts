@@ -17,7 +17,7 @@ export default class Tile implements Entity {
 	constructor(
 		public readonly pos: THREE.Vector3,
 		planeVisibility: boolean[],
-		texturePacks: TexturePack[],
+		texturePacks: Array<TexturePack | undefined>,
 	) {
 		const mergedGeometry = new THREE.Geometry();
 		let visibleIndex = 0;
@@ -77,7 +77,7 @@ export default class Tile implements Entity {
 
 		const materials = planeVisibility.map((visible, idx) => {
 			if (!visible) return;
-			return this._createMaterial(texturePacks[idx]);
+			return this._createMaterial(texturePacks[idx] as TexturePack);
 		}).filter(val => val);
 
 		this._mesh = new THREE.Mesh(mergedGeometry, materials as THREE.RawShaderMaterial[]);

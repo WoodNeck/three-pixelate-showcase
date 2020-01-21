@@ -63,33 +63,51 @@ export default class StoneWallStrategy {
 				const nzVoxel = neighbors[DIRECTION.NZ]
 					? neighbors[DIRECTION.NZ]![x][y]
 					: null;
-
-				const randomX = random();
-				const randomY = random();
-
-				let connectedX = randomX < 0.5;
-				let connectedY = randomY < 0.5;
-				let connectedZ = !!nzVoxel && !nzVoxel.connection[DIRECTION.NZ];
-				let color = palette[Math.floor(random() * palette.length)];
+				const pxnzVoxel = neighbors[DIRECTION.NZ]
+					? neighbors[DIRECTION.NZ]![x + 1] && neighbors[DIRECTION.NZ]![x + 1][y]
+					: null;
+				const pynzVoxel = neighbors[DIRECTION.NZ]
+					? neighbors[DIRECTION.NZ]![x][y + 1]
+					: null;
 
 				const connectedNX = nxVoxel && nxVoxel.connection[DIRECTION.PX];
 				const connectedNY = nyVoxel && nyVoxel.connection[DIRECTION.PY];
+				const connectedNZ = nzVoxel && nzVoxel.connection[DIRECTION.PZ];
+				const randomX = random();
+				const randomY = random();
+				const randomZ = random();
 
-				if (connectedNX && connectedNY) {
-					connectedX = false;
-					connectedY = false;
-					connectedZ = nxVoxel!.connection[DIRECTION.NZ];
-					color = nxVoxel!.color; // = downVoxel!.color
-				} else if (connectedNX) {
-					connectedX = false;
-					connectedY = nxVoxel!.connection[DIRECTION.PY];
-					connectedZ = nxVoxel!.connection[DIRECTION.NZ];
-					color = nxVoxel!.color;
-				} else if (connectedNY) {
-					connectedX = nyVoxel!.connection[DIRECTION.PX];
-					connectedY = false;
-					connectedZ = nyVoxel!.connection[DIRECTION.NZ];
-					color = nyVoxel!.color;
+				let connectedX = pxnzVoxel && pxnzVoxel.connection[DIRECTION.PZ]
+					? false
+					: randomX < 0.5;
+				let connectedY = pynzVoxel && pynzVoxel.connection[DIRECTION.PZ]
+					? false
+					: randomY < 0.5;
+				let connectedZ = randomZ < 0.5;
+				let color = palette[Math.floor(random() * palette.length)];
+
+				if (connectedNZ) {
+					connectedX = nzVoxel!.connection[DIRECTION.PX];
+					connectedY = nzVoxel!.connection[DIRECTION.PY];
+					connectedZ = false;
+					color = nzVoxel!.color;
+				} else {
+					if (connectedNX && connectedNY) {
+						connectedX = false;
+						connectedY = false;
+						connectedZ = nxVoxel!.connection[DIRECTION.PZ];
+						color = nxVoxel!.color; // = downVoxel!.color
+					} else if (connectedNX) {
+						connectedX = false;
+						connectedY = nxVoxel!.connection[DIRECTION.PY];
+						connectedZ = nxVoxel!.connection[DIRECTION.PZ];
+						color = nxVoxel!.color;
+					} else if (connectedNY) {
+						connectedX = nyVoxel!.connection[DIRECTION.PX];
+						connectedY = false;
+						connectedZ = nyVoxel!.connection[DIRECTION.PZ];
+						color = nyVoxel!.color;
+					}
 				}
 
 				voxels[x][y] = {
@@ -97,7 +115,7 @@ export default class StoneWallStrategy {
 					connection: {
 						[DIRECTION.PX]: connectedX,
 						[DIRECTION.PY]: connectedY,
-						[DIRECTION.NZ]: connectedZ,
+						[DIRECTION.PZ]: connectedZ,
 					},
 				};
 			}

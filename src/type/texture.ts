@@ -8,7 +8,7 @@ export interface Voxel {
 	connection: {
 		[DIRECTION.PX]: boolean;
 		[DIRECTION.PY]: boolean;
-		[DIRECTION.NZ]: boolean;
+		[DIRECTION.PZ]: boolean;
 	};
 }
 
