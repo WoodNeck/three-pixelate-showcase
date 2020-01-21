@@ -63,59 +63,56 @@ export default class StoneWallStrategy {
 				const nzVoxel = neighbors[DIRECTION.NZ]
 					? neighbors[DIRECTION.NZ]![x][y]
 					: null;
-				const pxnzVoxel = neighbors[DIRECTION.NZ]
-					? neighbors[DIRECTION.NZ]![x + 1] && neighbors[DIRECTION.NZ]![x + 1][y]
-					: null;
-				const pynzVoxel = neighbors[DIRECTION.NZ]
-					? neighbors[DIRECTION.NZ]![x][y + 1]
-					: null;
 
-				const connectedNX = nxVoxel && nxVoxel.connection[DIRECTION.PX];
-				const connectedNY = nyVoxel && nyVoxel.connection[DIRECTION.PY];
-				const connectedNZ = nzVoxel && nzVoxel.connection[DIRECTION.PZ];
+				const connectedNX = !!nxVoxel && nxVoxel.connection[DIRECTION.PX];
+				const connectedNY = !!nyVoxel && nyVoxel.connection[DIRECTION.PY];
+				const connectedPZ = false;
 				const randomX = random();
 				const randomY = random();
 				const randomZ = random();
 
-				let connectedX = pxnzVoxel && pxnzVoxel.connection[DIRECTION.PZ]
+				let connectedPX = randomX < 0.5;
+				let connectedPY = randomY < 0.5;
+				let connectedNZ = !nzVoxel || nzVoxel.connection[DIRECTION.NZ]
 					? false
-					: randomX < 0.5;
-				let connectedY = pynzVoxel && pynzVoxel.connection[DIRECTION.PZ]
-					? false
-					: randomY < 0.5;
-				let connectedZ = randomZ < 0.5;
+					: nzVoxel.connection[DIRECTION.NX] !== connectedNX || nzVoxel.connection[DIRECTION.NY] !== connectedNY
+						? false
+						: randomZ < 0.5;
 				let color = palette[Math.floor(random() * palette.length)];
 
+				if (connectedNX && connectedNY) {
+					connectedPX = false;
+					connectedPY = false;
+					connectedNZ = nxVoxel!.connection[DIRECTION.NZ];
+					color = nxVoxel!.color; // = downVoxel!.color
+				} else if (connectedNX) {
+					connectedPX = false;
+					connectedPY = nxVoxel!.connection[DIRECTION.PY];
+					connectedNZ = nxVoxel!.connection[DIRECTION.NZ];
+					color = nxVoxel!.color;
+				} else if (connectedNY) {
+					connectedPX = nyVoxel!.connection[DIRECTION.PX];
+					connectedPY = false;
+					connectedNZ = nyVoxel!.connection[DIRECTION.NZ];
+					color = nyVoxel!.color;
+				}
+
 				if (connectedNZ) {
-					connectedX = nzVoxel!.connection[DIRECTION.PX];
-					connectedY = nzVoxel!.connection[DIRECTION.PY];
-					connectedZ = false;
+					connectedPX = nzVoxel!.connection[DIRECTION.PX];
+					connectedPY = nzVoxel!.connection[DIRECTION.PY];
+					nzVoxel!.connection[DIRECTION.PZ] = true;
 					color = nzVoxel!.color;
-				} else {
-					if (connectedNX && connectedNY) {
-						connectedX = false;
-						connectedY = false;
-						connectedZ = nxVoxel!.connection[DIRECTION.PZ];
-						color = nxVoxel!.color; // = downVoxel!.color
-					} else if (connectedNX) {
-						connectedX = false;
-						connectedY = nxVoxel!.connection[DIRECTION.PY];
-						connectedZ = nxVoxel!.connection[DIRECTION.PZ];
-						color = nxVoxel!.color;
-					} else if (connectedNY) {
-						connectedX = nyVoxel!.connection[DIRECTION.PX];
-						connectedY = false;
-						connectedZ = nyVoxel!.connection[DIRECTION.PZ];
-						color = nyVoxel!.color;
-					}
 				}
 
 				voxels[x][y] = {
 					color,
 					connection: {
-						[DIRECTION.PX]: connectedX,
-						[DIRECTION.PY]: connectedY,
-						[DIRECTION.PZ]: connectedZ,
+						[DIRECTION.PX]: connectedPX,
+						[DIRECTION.NX]: connectedNX,
+						[DIRECTION.PY]: connectedPY,
+						[DIRECTION.NY]: connectedNY,
+						[DIRECTION.PZ]: connectedPZ,
+						[DIRECTION.NZ]: connectedNZ,
 					},
 				};
 			}

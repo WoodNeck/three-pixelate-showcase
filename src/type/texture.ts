@@ -7,8 +7,11 @@ export interface Voxel {
 	color: Vec3;
 	connection: {
 		[DIRECTION.PX]: boolean;
+		[DIRECTION.NX]: boolean;
 		[DIRECTION.PY]: boolean;
+		[DIRECTION.NY]: boolean;
 		[DIRECTION.PZ]: boolean;
+		[DIRECTION.NZ]: boolean;
 	};
 }
 

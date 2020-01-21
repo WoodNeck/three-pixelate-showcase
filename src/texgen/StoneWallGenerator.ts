@@ -141,45 +141,25 @@ export default class StoneWallGenerator {
 
 		[TEXTURE.BRICK_FLOOR.TOP, TEXTURE.BRICK_FLOOR.BOTTOM].forEach((floor, floorIdx) => {
 			const voxels = brick[floor];
-			const nzVoxels = floor === TEXTURE.BRICK_FLOOR.TOP
-				? brick[TEXTURE.BRICK_FLOOR.BOTTOM]
-				: nzBrick && nzBrick[TEXTURE.BRICK_FLOOR.TOP];
 
 			let connections: boolean[];
 			let zConnections: boolean[];
 			let colors: Vec3[];
 			if (side === DIRECTION.PX) {
 				connections = voxels[gridWidth - 1].map(voxel => voxel.connection[DIRECTION.PY]);
-				zConnections = nzVoxels
-					? nzVoxels[gridWidth - 1].map(voxel => voxel.connection[DIRECTION.PZ])
-					: [...range(gridWidth)].map(() => false);
+				zConnections = voxels[gridWidth - 1].map(voxel => voxel.connection[DIRECTION.NZ]);
 				colors = voxels[gridWidth - 1].map(voxel => voxel.color);
 			} else if (side === DIRECTION.NX) {
-				const connectedWithNY = !!nyBrick && nyBrick[floor][0][gridHeight - 1].connection[DIRECTION.PY];
-				const reversedConnection = voxels[0].slice(0, voxels[0].length - 1).map(voxel => voxel.connection[DIRECTION.PY]).reverse();
-				connections = [...reversedConnection, connectedWithNY];
-				zConnections = nzVoxels
-					? nzVoxels[0].map(voxel => voxel.connection[DIRECTION.PZ]).reverse()
-					: [...range(gridWidth)].map(() => false);
+				connections = voxels[0].map(voxel => voxel.connection[DIRECTION.NY]).reverse();
+				zConnections = voxels[0].map(voxel => voxel.connection[DIRECTION.NZ]).reverse();
 				colors = voxels[0].map(voxel => voxel.color).reverse();
-
-				if (x === 0 && y === 1 && z === 1 && floor === TEXTURE.BRICK_FLOOR.TOP) {
-					console.log(voxels, nyBrick![floor]);
-				}
 			} else if (side === DIRECTION.PY) {
-				const connectedWithNX = !!nxBrick && nxBrick[floor][gridWidth - 1][gridHeight - 1].connection[DIRECTION.PX];
-				const reversedConnection = voxels.slice(0, voxels.length - 1).map(voxelsX => voxelsX[gridHeight - 1].connection[DIRECTION.PX]).reverse();
-
-				connections = [...reversedConnection, connectedWithNX];
-				zConnections = nzVoxels
-					? nzVoxels.map(voxelsX => voxelsX[gridHeight - 1].connection[DIRECTION.PZ]).reverse()
-					: [...range(gridWidth)].map(() => false);
+				connections = voxels.map(voxelsX => voxelsX[gridHeight - 1].connection[DIRECTION.NX]).reverse();
+				zConnections = voxels.map(voxelsX => voxelsX[gridHeight - 1].connection[DIRECTION.NZ]).reverse();
 				colors = voxels.map(voxelsX => voxelsX[gridHeight - 1].color).reverse();
 			} else {
 				connections = voxels.map(voxelsX => voxelsX[0].connection[DIRECTION.PX]);
-				zConnections = nzVoxels
-					? nzVoxels.map(voxelsX => voxelsX[0].connection[DIRECTION.PZ])
-					: [...range(gridWidth)].map(() => false);
+				zConnections = voxels.map(voxelsX => voxelsX[0].connection[DIRECTION.NZ]);
 				colors = voxels.map(voxelsX => voxelsX[0].color);
 			}
 
