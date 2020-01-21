@@ -135,9 +135,6 @@ export default class StoneWallGenerator {
 		const normalData = new Float32Array(4 * textureSize); // 0 ~ 1
 
 		const brick = this._bricks.get(this._tileIndexAt(x, y, z))!;
-		const nxBrick = this._bricks.get(this._tileIndexAt(x - 1, y, z));
-		const nyBrick = this._bricks.get(this._tileIndexAt(x, y - 1, z));
-		const nzBrick = this._bricks.get(this._tileIndexAt(x, y, z - 1));
 
 		[TEXTURE.BRICK_FLOOR.TOP, TEXTURE.BRICK_FLOOR.BOTTOM].forEach((floor, floorIdx) => {
 			const voxels = brick[floor];
@@ -196,6 +193,7 @@ export default class StoneWallGenerator {
 
 	private _tileIndexAt(x: number, y: number, z: number) {
 		const mapSize = this._map.size;
+		if (x >= mapSize[0] || x < 0 || y >= mapSize[1] || y < 0) return -1;
 		return x + y * mapSize[0] + z * mapSize[0] * mapSize[1];
 	}
 }

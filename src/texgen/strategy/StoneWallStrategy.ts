@@ -9,20 +9,26 @@ export default class StoneWallStrategy {
 		const { map, pos, palette, neighbors } = ctx;
 		const [x, y, z] = pos;
 
-		const isTopTile = z + 1 === map.getHeight(x, y);
+		const isLastX = x + 1 === map.size[0];
+		const isLastY = y + 1 === map.size[1];
+		const isToppest = z + 1 === map.getHeight(x, y);
 		const bottomNeighbors = {
 			[DIRECTION.NX]: neighbors[DIRECTION.NX] && neighbors[DIRECTION.NX]![BRICK_FLOOR.BOTTOM],
 			[DIRECTION.NY]: neighbors[DIRECTION.NY] && neighbors[DIRECTION.NY]![BRICK_FLOOR.BOTTOM],
 			[DIRECTION.NZ]: neighbors[DIRECTION.NZ] && neighbors[DIRECTION.NZ]![BRICK_FLOOR.TOP],
 		};
-		const bottomFloor = this._createBrickFloor(bottomNeighbors, palette, false);
+		const bottomFloor = this._createBrickFloor(bottomNeighbors, palette, {
+			isLastX, isLastY, isToppest,
+		});
 
 		const topNeighbors = {
 			[DIRECTION.NX]: neighbors[DIRECTION.NX] && neighbors[DIRECTION.NX]![BRICK_FLOOR.TOP],
 			[DIRECTION.NY]: neighbors[DIRECTION.NY] && neighbors[DIRECTION.NY]![BRICK_FLOOR.TOP],
 			[DIRECTION.NZ]: bottomFloor,
 		};
-		const topFloor = this._createBrickFloor(topNeighbors, palette, isTopTile);
+		const topFloor = this._createBrickFloor(topNeighbors, palette, {
+			isLastX, isLastY, isToppest,
+		});
 
 		return {
 			[BRICK_FLOOR.TOP]: topFloor,
@@ -41,10 +47,15 @@ export default class StoneWallStrategy {
 			[DIRECTION.NZ]?: Voxel[][],
 		},
 		palette: Vec3[],
-		isTopTile: boolean,
+		brickMeta: {
+			isToppest: boolean,
+			isLastX: boolean,
+			isLastY: boolean,
+		},
 	): Voxel[][] {
 		const width = SIZE.TOP.WIDTH / GRID_INTERVAL;
 		const height = SIZE.TOP.HEIGHT / GRID_INTERVAL;
+		const { isToppest, isLastX, isLastY } = brickMeta;
 
 		const voxels: Voxel[][] = [...range(width)].map(() => new Array<Voxel>(height));
 
@@ -71,8 +82,8 @@ export default class StoneWallStrategy {
 				const randomY = random();
 				const randomZ = random();
 
-				let connectedPX = randomX < 0.5;
-				let connectedPY = randomY < 0.5;
+				let connectedPX = !isLastX && randomX < 0.5;
+				let connectedPY = !isLastY && randomY < 0.5;
 				let connectedNZ = !nzVoxel || nzVoxel.connection[DIRECTION.NZ]
 					? false
 					: nzVoxel.connection[DIRECTION.NX] !== connectedNX || nzVoxel.connection[DIRECTION.NY] !== connectedNY
