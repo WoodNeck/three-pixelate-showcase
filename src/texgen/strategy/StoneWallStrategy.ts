@@ -15,6 +15,10 @@ export default class StoneWallStrategy {
 		const isLastY = y + 1 === map.size[1]
 			|| z >= map.getHeight(x, y + 1)
 			|| z < map.getHeight(x + 1, y + 1);
+		const shouldSplitX = z + 1 === map.getHeight(x + 1, y);
+		const shouldSplitY = z + 1 === map.getHeight(x, y + 1);
+		const shouldSplitZ = z === map.getHeight(x, y - 1)
+			|| z === map.getHeight(x - 1, y);
 		const isToppest = z + 1 === map.getHeight(x, y);
 		const bottomNeighbors = {
 			[DIRECTION.NX]: neighbors[DIRECTION.NX] && neighbors[DIRECTION.NX]![BRICK_FLOOR.BOTTOM],
@@ -22,7 +26,7 @@ export default class StoneWallStrategy {
 			[DIRECTION.NZ]: neighbors[DIRECTION.NZ] && neighbors[DIRECTION.NZ]![BRICK_FLOOR.TOP],
 		};
 		const bottomFloor = this._createBrickFloor(bottomNeighbors, palette, {
-			isLastX, isLastY, isToppest,
+			isLastX, isLastY, shouldSplitZ, isToppest: false,
 		});
 
 		const topNeighbors = {
@@ -31,7 +35,10 @@ export default class StoneWallStrategy {
 			[DIRECTION.NZ]: bottomFloor,
 		};
 		const topFloor = this._createBrickFloor(topNeighbors, palette, {
-			isLastX, isLastY, isToppest,
+			isLastX: isLastX || shouldSplitX,
+			isLastY: isLastY || shouldSplitY,
+			shouldSplitZ: isToppest,
+			isToppest,
 		});
 
 		return {
@@ -52,19 +59,20 @@ export default class StoneWallStrategy {
 		},
 		palette: Vec3[],
 		brickMeta: {
-			isToppest: boolean,
 			isLastX: boolean,
 			isLastY: boolean,
+			shouldSplitZ: boolean,
+			isToppest: boolean,
 		},
 	): Voxel[][] {
 		const width = SIZE.TOP.WIDTH / GRID_INTERVAL;
 		const height = SIZE.TOP.HEIGHT / GRID_INTERVAL;
-		const { isToppest, isLastX, isLastY } = brickMeta;
+		const { isLastX, isLastY, shouldSplitZ, isToppest } = brickMeta;
 
 		const voxels: Voxel[][] = [...range(width)].map(() => new Array<Voxel>(height));
 
-		for (const x of range(width)) {
-			for (const y of range(height)) {
+		for (const y of range(height)) {
+			for (const x of range(width)) {
 				const nxVoxel = x === 0
 					? neighbors[DIRECTION.NX]
 						? neighbors[DIRECTION.NX]![width - 1][y]
@@ -88,7 +96,7 @@ export default class StoneWallStrategy {
 
 				let connectedPX = !(isLastX && x === width - 1) && randomX < 0.5;
 				let connectedPY = !(isLastY && y === height - 1) && randomY < 0.5;
-				let connectedNZ = !nzVoxel || nzVoxel.connection[DIRECTION.NZ]
+				let connectedNZ = shouldSplitZ || !nzVoxel || nzVoxel.connection[DIRECTION.NZ]
 					? false
 					: nzVoxel.connection[DIRECTION.NX] !== connectedNX || nzVoxel.connection[DIRECTION.NY] !== connectedNY
 						? false

@@ -156,8 +156,8 @@ export default class StoneWallGenerator {
 		const width = TEXTURE.SIZE.SIDE.WIDTH;
 		const height = TEXTURE.SIZE.SIDE.HEIGHT;
 		const gridInterval = TEXTURE.GRID_INTERVAL;
-		const gridWidth = width / gridInterval;
-		const gridHeight = height / gridInterval;
+		const gridWidth = TEXTURE.SIZE.TOP.WIDTH / gridInterval;
+		const gridHeight = TEXTURE.SIZE.TOP.HEIGHT / gridInterval;
 		const textureSize = width * height;
 
 		const albedoData = new Uint8Array(3 * textureSize); // 0 ~ 255
