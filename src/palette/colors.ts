@@ -3,6 +3,7 @@ import { Palette } from "@/type/common";
 // https://lospec.com/palette-list/sweetie-16
 export const SWEETIE16: Palette = {
 	name: "sweetie-16",
+	outline: "#1a1c2c",
 	colors: [
 		"#1a1c2c",
 		"#5d275d",
@@ -26,6 +27,7 @@ export const SWEETIE16: Palette = {
 // https://lospec.com/palette-list/endesga-16
 export const ENDESGA16: Palette = {
 	name: "endesga-16",
+	outline: "#0484d1",
 	colors: [
 		"#e4a672",
 		"#b86f50",
@@ -49,6 +51,7 @@ export const ENDESGA16: Palette = {
 // https://lospec.com/palette-list/ice-cream-gb
 export const ICE_CREAM_GB = {
 	name: "ice-cream-gb",
+	outline: "#3e1f2c",
 	colors: [
 		"#7c3f58",
 		"#eb6b6f",
@@ -60,6 +63,7 @@ export const ICE_CREAM_GB = {
 // https://lospec.com/palette-list/indecision
 export const INDECISION = {
 	name: "indecision",
+	outline: "#2c1b2e",
 	colors: [
 		"#fff4e0",
 		"#8fcccb",
@@ -84,6 +88,7 @@ export const INDECISION = {
 // https://lospec.com/palette-list/island-joy-16
 export const ISLAND_JOY_16: Palette = {
 	name: "island-joy-16",
+	outline: "#393457",
 	colors: [
 		"#ffffff",
 		"#6df7c1",
@@ -107,6 +112,7 @@ export const ISLAND_JOY_16: Palette = {
 // https://lospec.com/palette-list/nintendo-entertainment-system
 export const NES = {
 	name: "nes",
+	outline: "#000000",
 	colors: [
 		"#000000",
 		"#fcfcfc",
@@ -169,6 +175,7 @@ export const NES = {
 // https://lospec.com/palette-list/nintendo-super-gameboy
 export const SUPER_GAMEBOY: Palette = {
 	name: "nintendo-super-gameboy",
+	outline: "#331e50",
 	colors: [
 		"#331e50",
 		"#a63725",
@@ -179,8 +186,12 @@ export const SUPER_GAMEBOY: Palette = {
 
 export const STONE_BRICK: Palette = {
 	name: "stone-brick",
+	outline: "#393121",
 	colors: [
-		"#605C52",
-		"#2C2A25",
+		"#7b8452",
+		"#6b6b42",
+		"#9da673",
+		"#634a29",
+		"#423931",
 	],
 };

@@ -13,6 +13,7 @@ import { Brick } from "@/type/texture";
 export default class StoneWallGenerator {
 	private _map: TileMap;
 	private _bricks: Map<number, Brick>;
+	private _outline: Vec3;
 	private _palette: Vec3[];
 	private _strategy: StoneWallStrategy;
 
@@ -20,6 +21,7 @@ export default class StoneWallGenerator {
 		this._map = map;
 		this._bricks = new Map();
 		this._strategy = new StoneWallStrategy();
+		this._outline = parseColorHex(palette.outline);
 		this._palette = palette.colors.map(hex => parseColorHex(hex));
 	}
 
@@ -99,6 +101,7 @@ export default class StoneWallGenerator {
 		aoData: Float32Array,
 		normalData: Float32Array,
 	} {
+		const outline = this._outline;
 		const width = TEXTURE.SIZE.TOP.WIDTH;
 		const height = TEXTURE.SIZE.TOP.HEIGHT;
 		const gridInterval = TEXTURE.GRID_INTERVAL;
@@ -123,14 +126,13 @@ export default class StoneWallGenerator {
 
 				const voxel = topBricks[gridX][gridHeight - gridY - 1];
 
-				if (gridOffsetX === 0 && !voxel.connection[DIRECTION.NX]) {
-					albedoData[3 * texelIndex + 0] = 0;
-					albedoData[3 * texelIndex + 1] = 0;
-					albedoData[3 * texelIndex + 2] = 0;
-				} else if (gridOffsetY === gridInterval - 1 && !voxel.connection[DIRECTION.NY]) {
-					albedoData[3 * texelIndex + 0] = 0;
-					albedoData[3 * texelIndex + 1] = 0;
-					albedoData[3 * texelIndex + 2] = 0;
+				const isGridX = gridOffsetX === 0 && !voxel.connection[DIRECTION.NX];
+				const isGridY = gridOffsetY === gridInterval - 1 && !voxel.connection[DIRECTION.NY];
+
+				if (isGridX || isGridY) {
+					albedoData[3 * texelIndex + 0] = outline[0];
+					albedoData[3 * texelIndex + 1] = outline[1];
+					albedoData[3 * texelIndex + 2] = outline[2];
 				} else {
 					albedoData[3 * texelIndex + 0] = voxel.color[0];
 					albedoData[3 * texelIndex + 1] = voxel.color[1];
@@ -153,6 +155,7 @@ export default class StoneWallGenerator {
 		aoData: Float32Array,
 		normalData: Float32Array,
 	} {
+		const outline = this._outline;
 		const width = TEXTURE.SIZE.SIDE.WIDTH;
 		const height = TEXTURE.SIZE.SIDE.HEIGHT;
 		const gridInterval = TEXTURE.GRID_INTERVAL;
@@ -197,14 +200,13 @@ export default class StoneWallGenerator {
 					const gridOffsetX = texX % gridInterval;
 					const texelIndex = texX + texY * width + floorIdx * width * gridInterval;
 
-					if (gridOffsetX === gridInterval - 1 && !connections[gridX]) {
-						albedoData[3 * texelIndex + 0] = 0;
-						albedoData[3 * texelIndex + 1] = 0;
-						albedoData[3 * texelIndex + 2] = 0;
-					} else if (texY === gridInterval - 1 && !zConnections[gridX]) {
-						albedoData[3 * texelIndex + 0] = 0;
-						albedoData[3 * texelIndex + 1] = 0;
-						albedoData[3 * texelIndex + 2] = 0;
+					const isGridX = gridOffsetX === gridInterval - 1 && !connections[gridX];
+					const isGridY = texY === gridInterval - 1 && !zConnections[gridX];
+
+					if (isGridX || isGridY) {
+						albedoData[3 * texelIndex + 0] = outline[0];
+						albedoData[3 * texelIndex + 1] = outline[1];
+						albedoData[3 * texelIndex + 2] = outline[2];
 					} else {
 						albedoData[3 * texelIndex + 0] = colors[gridX][0];
 						albedoData[3 * texelIndex + 1] = colors[gridX][1];
