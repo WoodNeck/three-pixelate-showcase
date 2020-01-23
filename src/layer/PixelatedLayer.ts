@@ -10,6 +10,7 @@ export default class PixelatedLayer extends Layer {
 	private _scene: THREE.Scene;
 	private _camera: THREE.OrthographicCamera;
 	private _sun: THREE.DirectionalLight;
+	private _ambient: THREE.AmbientLight;
 	private _pixelPerUnit: number = 8;
 
 	public get scene() { return this._scene; }
@@ -29,12 +30,14 @@ export default class PixelatedLayer extends Layer {
 		// const viewDir = new THREE.Vector3(0, 0, -1).applyQuaternion(this._camera.quaternion);
 		// this._camera.position.add(viewDir.multiplyScalar(-30));
 
-		this._sun = new THREE.DirectionalLight(new THREE.Color("#fff"), 2);
+		this._sun = new THREE.DirectionalLight(new THREE.Color("#fff"), 0.5);
 
-		this._sun.position.set(0, -3, 6);
+		this._sun.position.set(3, -3, 6);
 		this._sun.lookAt(0, 0, 0);
 
-		this._scene.add(new THREE.AmbientLight("#fff", 1));
+		this._ambient = new THREE.AmbientLight(new THREE.Color("#fff"), 0.5);
+
+		this._scene.add(new THREE.AmbientLight("#bbf", 1));
 
 		this._scene.add(this._sun);
 

@@ -1,4 +1,4 @@
-import { DIRECTION } from "@/const/common";
+import { DIRECTION, DIR8 } from "@/const/common";
 import { BRICK_FLOOR, GRID_INTERVAL, SIZE } from "@/const/texture";
 import { Vec3 } from "@/type/common";
 import { Brick, BrickStrategyContext, Voxel } from "@/type/texture";
@@ -8,6 +8,18 @@ export default class StoneWallStrategy {
 	public createBrick(ctx: BrickStrategyContext): Brick {
 		const { map, pos, palette, neighbors } = ctx;
 		const [x, y, z] = pos;
+
+		const height = map.getHeight(x, y);
+		const heightDiff = {
+			[DIR8.NW]: map.getHeight(x - 1, y + 1) - height,
+			[DIR8.N]: map.getHeight(x, y + 1) - height,
+			[DIR8.NE]: map.getHeight(x + 1, y + 1) - height,
+			[DIR8.W]: map.getHeight(x - 1, y) - height,
+			[DIR8.E]: map.getHeight(x + 1, y) - height,
+			[DIR8.SW]: map.getHeight(x - 1, y - 1) - height,
+			[DIR8.S]: map.getHeight(x, y - 1) - height,
+			[DIR8.SE]: map.getHeight(x + 1, y - 1) - height,
+		};
 
 		const isLastX = x + 1 === map.size[0]
 			|| z >= map.getHeight(x + 1, y)
@@ -19,13 +31,14 @@ export default class StoneWallStrategy {
 		const shouldSplitY = z + 1 === map.getHeight(x, y + 1);
 		const shouldSplitZ = z === map.getHeight(x, y - 1)
 			|| z === map.getHeight(x - 1, y);
-		const isToppest = z + 1 === map.getHeight(x, y);
+		const isToppest = z + 1 === height;
+
 		const bottomNeighbors = {
 			[DIRECTION.NX]: neighbors[DIRECTION.NX] && neighbors[DIRECTION.NX]![BRICK_FLOOR.BOTTOM],
 			[DIRECTION.NY]: neighbors[DIRECTION.NY] && neighbors[DIRECTION.NY]![BRICK_FLOOR.BOTTOM],
 			[DIRECTION.NZ]: neighbors[DIRECTION.NZ] && neighbors[DIRECTION.NZ]![BRICK_FLOOR.TOP],
 		};
-		const bottomFloor = this._createBrickFloor(bottomNeighbors, palette, {
+		const bottomFloor = this._createBrickFloor(bottomNeighbors, heightDiff, palette, {
 			isLastX, isLastY, shouldSplitZ, isToppest: false,
 		});
 
@@ -34,7 +47,7 @@ export default class StoneWallStrategy {
 			[DIRECTION.NY]: neighbors[DIRECTION.NY] && neighbors[DIRECTION.NY]![BRICK_FLOOR.TOP],
 			[DIRECTION.NZ]: bottomFloor,
 		};
-		const topFloor = this._createBrickFloor(topNeighbors, palette, {
+		const topFloor = this._createBrickFloor(topNeighbors, heightDiff, palette, {
 			isLastX: isLastX || shouldSplitX,
 			isLastY: isLastY || shouldSplitY,
 			shouldSplitZ: isToppest,
@@ -56,6 +69,16 @@ export default class StoneWallStrategy {
 			[DIRECTION.NX]?: Voxel[][],
 			[DIRECTION.NY]?: Voxel[][],
 			[DIRECTION.NZ]?: Voxel[][],
+		},
+		heightDiff: {
+			[DIR8.NW]: number;
+			[DIR8.N]: number;
+			[DIR8.NE]: number;
+			[DIR8.W]: number;
+			[DIR8.E]: number;
+			[DIR8.SW]: number;
+			[DIR8.S]: number;
+			[DIR8.SE]: number;
 		},
 		palette: Vec3[],
 		brickMeta: {
@@ -137,6 +160,27 @@ export default class StoneWallStrategy {
 					color = nzVoxel!.color;
 				}
 
+				// Ambient occlusion calculation based of neighbor heights.
+				const occlusion = {
+					[DIRECTION.PX]: 1,
+					[DIRECTION.NX]: 1,
+					[DIRECTION.PY]: 1,
+					[DIRECTION.NY]: 1,
+					[DIRECTION.PZ]: 1,
+				};
+
+				if (isToppest) {
+					const tangents = [
+						Math.atan2(Math.max(heightDiff[DIR8.E], 0), (width - x)),
+						Math.atan2(Math.max(heightDiff[DIR8.W], 0), (x + 1)),
+						Math.atan2(Math.max(heightDiff[DIR8.N], 0), (height - y)),
+						Math.atan2(Math.max(heightDiff[DIR8.S], 0), (y + 1)),
+					];
+					const avgOcclusion = tangents.map(val => Math.max(val, 0) / (Math.PI / 2))
+						.reduce((sum, tangent) => sum + tangent, 0) / tangents.length;
+					occlusion[DIRECTION.PZ] = Math.max(avgOcclusion, 0);
+				}
+
 				voxels[x][y] = {
 					color,
 					connection: {
@@ -147,6 +191,7 @@ export default class StoneWallStrategy {
 						[DIRECTION.PZ]: connectedPZ,
 						[DIRECTION.NZ]: connectedNZ,
 					},
+					occlusion,
 				};
 			}
 		}

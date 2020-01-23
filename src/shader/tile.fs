@@ -14,6 +14,7 @@ uniform sampler2D albedoMap;
 uniform sampler2D displacementMap;
 uniform sampler2D aoMap;
 uniform sampler2D normalMap;
+uniform vec3 ambientLightColor;
 uniform DirectionalLight directionalLights[ NUM_DIR_LIGHTS ];
 
 in vec2 vUv;
@@ -22,7 +23,10 @@ out vec4 col;
 
 void main() {
 	vec3 lightTo = normalize(directionalLights[0].direction);
-	float diffuse = dot(vNormal, lightTo) * .5 + .5;
+	vec4 albedo = texture(albedoMap, vUv);
+	float ao = texture(aoMap, vUv).r;
+	float diffuse = max(dot(vNormal, lightTo), 0.);
 
-	col = diffuse * texture(albedoMap, vUv);
+	col = .4 * max(1. - ao, 0.) * vec4(ambientLightColor, 1) * albedo
+		+ .6 * diffuse * albedo;
 }

@@ -138,6 +138,7 @@ export default class StoneWallGenerator {
 					albedoData[3 * texelIndex + 1] = voxel.color[1];
 					albedoData[3 * texelIndex + 2] = voxel.color[2];
 				}
+				aoData[texelIndex] = voxel.occlusion[DIRECTION.PZ];
 			}
 		}
 
