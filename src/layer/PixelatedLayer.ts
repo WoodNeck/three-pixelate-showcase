@@ -37,7 +37,7 @@ export default class PixelatedLayer extends Layer {
 
 		this._ambient = new THREE.AmbientLight(new THREE.Color("#fff"), 0.5);
 
-		this._scene.add(new THREE.AmbientLight("#bbf", 1));
+		this._scene.add(this._ambient);
 
 		this._scene.add(this._sun);
 

@@ -7,7 +7,7 @@ import { DIRECTION } from "@/const/common";
 import * as TEXTURE from "@/const/texture";
 import * as COLORS from "@/palette/colors";
 import { TexturePack, Palette, Vec3 } from "@/type/common";
-import { Brick } from "@/type/texture";
+import { Brick, Voxel } from "@/type/texture";
 
 // Procedually generated stone wall texture
 export default class StoneWallGenerator {
@@ -172,34 +172,42 @@ export default class StoneWallGenerator {
 		const brick = this._bricks.get(this._tileIndexAt(x, y, z))!;
 
 		[TEXTURE.BRICK_FLOOR.TOP, TEXTURE.BRICK_FLOOR.BOTTOM].forEach((floor, floorIdx) => {
-			const voxels = brick[floor];
+			const voxelsOnFloor = brick[floor];
 
 			let connections: boolean[];
 			let zConnections: boolean[];
 			let colors: Vec3[];
+			let voxels: Voxel[];
 			if (side === DIRECTION.PX) {
-				connections = voxels[gridWidth - 1].map(voxel => voxel.connection[DIRECTION.PY]);
-				zConnections = voxels[gridWidth - 1].map(voxel => voxel.connection[DIRECTION.NZ]);
-				colors = voxels[gridWidth - 1].map(voxel => voxel.color);
+				voxels = voxelsOnFloor[gridWidth - 1].concat();
+				connections = voxelsOnFloor[gridWidth - 1].map(voxel => voxel.connection[DIRECTION.PY]);
+				zConnections = voxelsOnFloor[gridWidth - 1].map(voxel => voxel.connection[DIRECTION.NZ]);
+				colors = voxelsOnFloor[gridWidth - 1].map(voxel => voxel.color);
 			} else if (side === DIRECTION.NX) {
-				connections = voxels[0].map(voxel => voxel.connection[DIRECTION.NY]).reverse();
-				zConnections = voxels[0].map(voxel => voxel.connection[DIRECTION.NZ]).reverse();
-				colors = voxels[0].map(voxel => voxel.color).reverse();
+				voxels = voxelsOnFloor[0].concat().reverse();
+				connections = voxelsOnFloor[0].map(voxel => voxel.connection[DIRECTION.NY]).reverse();
+				zConnections = voxelsOnFloor[0].map(voxel => voxel.connection[DIRECTION.NZ]).reverse();
+				colors = voxelsOnFloor[0].map(voxel => voxel.color).reverse();
 			} else if (side === DIRECTION.PY) {
-				connections = voxels.map(voxelsX => voxelsX[gridHeight - 1].connection[DIRECTION.NX]).reverse();
-				zConnections = voxels.map(voxelsX => voxelsX[gridHeight - 1].connection[DIRECTION.NZ]).reverse();
-				colors = voxels.map(voxelsX => voxelsX[gridHeight - 1].color).reverse();
+				voxels = voxelsOnFloor.map(voxelsX => voxelsX[gridHeight - 1]).reverse();
+				connections = voxelsOnFloor.map(voxelsX => voxelsX[gridHeight - 1].connection[DIRECTION.NX]).reverse();
+				zConnections = voxelsOnFloor.map(voxelsX => voxelsX[gridHeight - 1].connection[DIRECTION.NZ]).reverse();
+				colors = voxelsOnFloor.map(voxelsX => voxelsX[gridHeight - 1].color).reverse();
 			} else {
-				connections = voxels.map(voxelsX => voxelsX[0].connection[DIRECTION.PX]);
-				zConnections = voxels.map(voxelsX => voxelsX[0].connection[DIRECTION.NZ]);
-				colors = voxels.map(voxelsX => voxelsX[0].color);
+				voxels = voxelsOnFloor.map(voxelsX => voxelsX[0]);
+				connections = voxelsOnFloor.map(voxelsX => voxelsX[0].connection[DIRECTION.PX]);
+				zConnections = voxelsOnFloor.map(voxelsX => voxelsX[0].connection[DIRECTION.NZ]);
+				colors = voxelsOnFloor.map(voxelsX => voxelsX[0].color);
 			}
 
 			for (const texX of range(width)) {
 				for (const texY of range(gridInterval)) {
 					const gridX = Math.floor(texX / gridInterval);
+					const gridY = Math.floor(texY / gridInterval);
 					const gridOffsetX = texX % gridInterval;
 					const texelIndex = texX + texY * width + floorIdx * width * gridInterval;
+
+					const voxel = voxels[gridX];
 
 					const isGridX = gridOffsetX === gridInterval - 1 && !connections[gridX];
 					const isGridY = texY === gridInterval - 1 && !zConnections[gridX];
@@ -213,6 +221,7 @@ export default class StoneWallGenerator {
 						albedoData[3 * texelIndex + 1] = colors[gridX][1];
 						albedoData[3 * texelIndex + 2] = colors[gridX][2];
 					}
+					aoData[texelIndex] = voxel.occlusion[side];
 				}
 			}
 		});

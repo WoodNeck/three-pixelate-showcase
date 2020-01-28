@@ -9,7 +9,7 @@ export default class StoneWallStrategy {
 		const { map, pos, palette, neighbors } = ctx;
 		const [x, y, z] = pos;
 
-		const height = map.getHeight(x, y);
+		const height = z + 1;
 		const heightDiff = {
 			[DIR8.NW]: map.getHeight(x - 1, y + 1) - height,
 			[DIR8.N]: map.getHeight(x, y + 1) - height,
@@ -39,7 +39,7 @@ export default class StoneWallStrategy {
 			[DIRECTION.NZ]: neighbors[DIRECTION.NZ] && neighbors[DIRECTION.NZ]![BRICK_FLOOR.TOP],
 		};
 		const bottomFloor = this._createBrickFloor(bottomNeighbors, heightDiff, palette, {
-			isLastX, isLastY, shouldSplitZ, isToppest: false,
+			isLastX, isLastY, shouldSplitZ, isToppest: false, isTopFloor: false,
 		});
 
 		const topNeighbors = {
@@ -52,6 +52,7 @@ export default class StoneWallStrategy {
 			isLastY: isLastY || shouldSplitY,
 			shouldSplitZ: isToppest,
 			isToppest,
+			isTopFloor: true,
 		});
 
 		return {
@@ -86,11 +87,12 @@ export default class StoneWallStrategy {
 			isLastY: boolean,
 			shouldSplitZ: boolean,
 			isToppest: boolean,
+			isTopFloor: boolean,
 		},
 	): Voxel[][] {
 		const width = SIZE.TOP.WIDTH / GRID_INTERVAL;
 		const height = SIZE.TOP.HEIGHT / GRID_INTERVAL;
-		const { isLastX, isLastY, shouldSplitZ, isToppest } = brickMeta;
+		const { isLastX, isLastY, shouldSplitZ, isToppest, isTopFloor } = brickMeta;
 
 		const voxels: Voxel[][] = [...range(width)].map(() => new Array<Voxel>(height));
 
@@ -162,23 +164,90 @@ export default class StoneWallStrategy {
 
 				// Ambient occlusion calculation based of neighbor heights.
 				const occlusion = {
-					[DIRECTION.PX]: 1,
-					[DIRECTION.NX]: 1,
-					[DIRECTION.PY]: 1,
-					[DIRECTION.NY]: 1,
-					[DIRECTION.PZ]: 1,
+					[DIRECTION.PX]: 0,
+					[DIRECTION.NX]: 0,
+					[DIRECTION.PY]: 0,
+					[DIRECTION.NY]: 0,
+					[DIRECTION.PZ]: 0,
 				};
 
-				if (isToppest) {
-					const tangents = [
-						Math.atan2(Math.max(heightDiff[DIR8.E], 0), (width - x)),
-						Math.atan2(Math.max(heightDiff[DIR8.W], 0), (x + 1)),
-						Math.atan2(Math.max(heightDiff[DIR8.N], 0), (height - y)),
-						Math.atan2(Math.max(heightDiff[DIR8.S], 0), (y + 1)),
-					];
-					const avgOcclusion = tangents.map(val => Math.max(val, 0) / (Math.PI / 2))
-						.reduce((sum, tangent) => sum + tangent, 0) / tangents.length;
-					occlusion[DIRECTION.PZ] = Math.max(avgOcclusion, 0);
+				const isMinX = x === 0;
+				const isMaxX = x === width - 1;
+				const isMinY = y === 0;
+				const isMaxY = y === height - 1;
+				const isVoxelOnEdge = isMinX || isMaxX || isMinY || isMaxY;
+				const occlusionAmount = 0.6;
+
+				if (isVoxelOnEdge) {
+					const zCheckDirs = [];
+
+					if (isMinX) {
+						zCheckDirs.push(DIR8.W);
+						if (!isTopFloor && heightDiff[DIR8.W] === -1) occlusion[DIRECTION.NX] = occlusionAmount;
+					} else if (isMaxX) {
+						zCheckDirs.push(DIR8.E);
+						if (!isTopFloor && heightDiff[DIR8.E] === -1) occlusion[DIRECTION.PX] = occlusionAmount;
+					}
+					if (isMinY) {
+						zCheckDirs.push(DIR8.S);
+						if (!isTopFloor && heightDiff[DIR8.S] === -1) occlusion[DIRECTION.NY] = occlusionAmount;
+					} else if (isMaxY) {
+						zCheckDirs.push(DIR8.N);
+						if (!isTopFloor && heightDiff[DIR8.N] === -1) occlusion[DIRECTION.PY] = occlusionAmount;
+					}
+
+					if (isMinX && isMinY) {
+						if (heightDiff[DIR8.W] === 0 && heightDiff[DIR8.S] === 0) {
+							zCheckDirs.push(DIR8.SW);
+						}
+						if (heightDiff[DIR8.SW] >= 0) {
+							occlusion[DIRECTION.NX] = occlusionAmount;
+							occlusion[DIRECTION.NY] = occlusionAmount;
+						}
+						if (!isTopFloor && heightDiff[DIR8.SW] === -1) {
+							if (heightDiff[DIR8.W] < 0) occlusion[DIRECTION.NX] = occlusionAmount;
+							if (heightDiff[DIR8.S] < 0) occlusion[DIRECTION.NY] = occlusionAmount;
+						}
+					} else if (isMinX && isMaxY) {
+						if (heightDiff[DIR8.W] === 0 && heightDiff[DIR8.N] === 0) {
+							zCheckDirs.push(DIR8.NW);
+						}
+						if (heightDiff[DIR8.NW] >= 0) {
+							occlusion[DIRECTION.NX] = occlusionAmount;
+							occlusion[DIRECTION.PY] = occlusionAmount;
+						}
+						if (!isTopFloor && heightDiff[DIR8.NW] === -1) {
+							if (heightDiff[DIR8.W] < 0) occlusion[DIRECTION.NX] = occlusionAmount;
+							if (heightDiff[DIR8.N] < 0) occlusion[DIRECTION.PY] = occlusionAmount;
+						}
+					} else if (isMaxX && isMinY) {
+						if (heightDiff[DIR8.E] === 0 && heightDiff[DIR8.S] === 0) {
+							zCheckDirs.push(DIR8.SE);
+						}
+						if (heightDiff[DIR8.SE] >= 0) {
+							occlusion[DIRECTION.PX] = occlusionAmount;
+							occlusion[DIRECTION.NY] = occlusionAmount;
+						}
+						if (!isTopFloor && heightDiff[DIR8.SE] === -1) {
+							if (heightDiff[DIR8.E] < 0) occlusion[DIRECTION.PX] = occlusionAmount;
+							if (heightDiff[DIR8.S] < 0) occlusion[DIRECTION.NY] = occlusionAmount;
+						}
+					} else if (isMaxX && isMaxY) {
+						if (heightDiff[DIR8.E] === 0 && heightDiff[DIR8.N] === 0) {
+							zCheckDirs.push(DIR8.NE);
+						}
+						if (heightDiff[DIR8.NE] >= 0) {
+							occlusion[DIRECTION.PX] = occlusionAmount;
+							occlusion[DIRECTION.PY] = occlusionAmount;
+						}
+						if (!isTopFloor && heightDiff[DIR8.NE] === -1) {
+							if (heightDiff[DIR8.E] < 0) occlusion[DIRECTION.PX] = occlusionAmount;
+							if (heightDiff[DIR8.N] < 0) occlusion[DIRECTION.PY] = occlusionAmount;
+						}
+					}
+
+					const isPZOccluded = zCheckDirs.some(dir => heightDiff[dir] > 0);
+					occlusion[DIRECTION.PZ] = isPZOccluded ? occlusionAmount : 0;
 				}
 
 				voxels[x][y] = {
