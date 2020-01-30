@@ -1,8 +1,11 @@
+import * as THREE from "three";
+
 import { DIRECTION, DIR8 } from "@/const/common";
 import { BRICK_FLOOR, GRID_INTERVAL, SIZE } from "@/const/texture";
 import { Vec3 } from "@/type/common";
 import { Brick, BrickStrategyContext, Voxel } from "@/type/texture";
 import { range, random } from "@/util";
+import TileMap from "@/map/TileMap";
 
 export default class StoneWallStrategy {
 	public createBrick(ctx: BrickStrategyContext): Brick {
@@ -10,6 +13,7 @@ export default class StoneWallStrategy {
 		const [x, y, z] = pos;
 
 		const height = z + 1;
+		const isToppest = z + 1 === map.getHeight(x, y);
 		const heightDiff = {
 			[DIR8.NW]: map.getHeight(x - 1, y + 1) - height,
 			[DIR8.N]: map.getHeight(x, y + 1) - height,
@@ -22,24 +26,26 @@ export default class StoneWallStrategy {
 		};
 
 		const isLastX = x + 1 === map.size[0]
-			|| z >= map.getHeight(x + 1, y)
-			|| z < map.getHeight(x + 1, y - 1);
+			|| heightDiff[DIR8.E] < 0
+			|| heightDiff[DIR8.SE] >= 0;
 		const isLastY = y + 1 === map.size[1]
-			|| z >= map.getHeight(x, y + 1)
-			|| z < map.getHeight(x + 1, y + 1);
-		const shouldSplitX = z + 1 === map.getHeight(x + 1, y);
-		const shouldSplitY = z + 1 === map.getHeight(x, y + 1);
-		const shouldSplitZ = z === map.getHeight(x, y - 1)
-			|| z === map.getHeight(x - 1, y);
-		const isToppest = z + 1 === height;
+			|| heightDiff[DIR8.N] < 0
+			|| heightDiff[DIR8.NE] >= 0;
+		const shouldSplitX = heightDiff[DIR8.E] === 0;
+		const shouldSplitY = heightDiff[DIR8.N] === 0;
+		const shouldSplitZ = heightDiff[DIR8.S] === -1 || heightDiff[DIR8.W] === -1;
 
 		const bottomNeighbors = {
 			[DIRECTION.NX]: neighbors[DIRECTION.NX] && neighbors[DIRECTION.NX]![BRICK_FLOOR.BOTTOM],
 			[DIRECTION.NY]: neighbors[DIRECTION.NY] && neighbors[DIRECTION.NY]![BRICK_FLOOR.BOTTOM],
 			[DIRECTION.NZ]: neighbors[DIRECTION.NZ] && neighbors[DIRECTION.NZ]![BRICK_FLOOR.TOP],
 		};
-		const bottomFloor = this._createBrickFloor(bottomNeighbors, heightDiff, palette, {
-			isLastX, isLastY, shouldSplitZ, isToppest: false, isTopFloor: false,
+		const bottomFloor = this._createBrickFloor(map, pos, palette, {
+			neighbors: bottomNeighbors,
+			isLastX,
+			isLastY,
+			shouldSplitZ,
+			isToppest: false,
 		});
 
 		const topNeighbors = {
@@ -47,12 +53,12 @@ export default class StoneWallStrategy {
 			[DIRECTION.NY]: neighbors[DIRECTION.NY] && neighbors[DIRECTION.NY]![BRICK_FLOOR.TOP],
 			[DIRECTION.NZ]: bottomFloor,
 		};
-		const topFloor = this._createBrickFloor(topNeighbors, heightDiff, palette, {
+		const topFloor = this._createBrickFloor(map, pos, palette, {
+			neighbors: topNeighbors,
 			isLastX: isLastX || shouldSplitX,
 			isLastY: isLastY || shouldSplitY,
 			shouldSplitZ: isToppest,
 			isToppest,
-			isTopFloor: true,
 		});
 
 		return {
@@ -66,50 +72,42 @@ export default class StoneWallStrategy {
 	 *   🡒 x
 	 */
 	private _createBrickFloor(
-		neighbors: {
-			[DIRECTION.NX]?: Voxel[][],
-			[DIRECTION.NY]?: Voxel[][],
-			[DIRECTION.NZ]?: Voxel[][],
-		},
-		heightDiff: {
-			[DIR8.NW]: number;
-			[DIR8.N]: number;
-			[DIR8.NE]: number;
-			[DIR8.W]: number;
-			[DIR8.E]: number;
-			[DIR8.SW]: number;
-			[DIR8.S]: number;
-			[DIR8.SE]: number;
-		},
+		map: TileMap,
+		pos: Vec3,
 		palette: Vec3[],
 		brickMeta: {
+			neighbors: {
+				[DIRECTION.NX]?: Voxel[][],
+				[DIRECTION.NY]?: Voxel[][],
+				[DIRECTION.NZ]?: Voxel[][],
+			},
 			isLastX: boolean,
 			isLastY: boolean,
 			shouldSplitZ: boolean,
 			isToppest: boolean,
-			isTopFloor: boolean,
 		},
 	): Voxel[][] {
 		const width = SIZE.TOP.WIDTH / GRID_INTERVAL;
 		const height = SIZE.TOP.HEIGHT / GRID_INTERVAL;
-		const { isLastX, isLastY, shouldSplitZ, isToppest, isTopFloor } = brickMeta;
+		const { neighbors, isLastX, isLastY, shouldSplitZ, isToppest } = brickMeta;
 
+		const [x, y, z] = pos;
 		const voxels: Voxel[][] = [...range(width)].map(() => new Array<Voxel>(height));
 
-		for (const y of range(height)) {
-			for (const x of range(width)) {
-				const nxVoxel = x === 0
+		for (const voxY of range(height)) {
+			for (const voxX of range(width)) {
+				const nxVoxel = voxX === 0
 					? neighbors[DIRECTION.NX]
-						? neighbors[DIRECTION.NX]![width - 1][y]
+						? neighbors[DIRECTION.NX]![width - 1][voxY]
 						: null
-					: voxels[x - 1][y];
-				const nyVoxel = y === 0
+					: voxels[voxX - 1][voxY];
+				const nyVoxel = voxY === 0
 					? neighbors[DIRECTION.NY]
-						? neighbors[DIRECTION.NY]![x][height - 1]
+						? neighbors[DIRECTION.NY]![voxX][height - 1]
 						: null
-					: voxels[x][y - 1];
+					: voxels[voxX][voxY - 1];
 				const nzVoxel = neighbors[DIRECTION.NZ]
-					? neighbors[DIRECTION.NZ]![x][y]
+					? neighbors[DIRECTION.NZ]![voxX][voxY]
 					: null;
 
 				let connectedNX = !!nxVoxel && nxVoxel.connection[DIRECTION.PX];
@@ -119,8 +117,8 @@ export default class StoneWallStrategy {
 				const randomY = random();
 				const randomZ = random();
 
-				let connectedPX = !(isLastX && x === width - 1) && randomX < 0.5;
-				let connectedPY = !(isLastY && y === height - 1) && randomY < 0.5;
+				let connectedPX = !(isLastX && voxX === width - 1) && randomX < 0.5;
+				let connectedPY = !(isLastY && voxY === height - 1) && randomY < 0.5;
 				let connectedNZ = shouldSplitZ || !nzVoxel || nzVoxel.connection[DIRECTION.NZ]
 					? false
 					: nzVoxel.connection[DIRECTION.NX] !== connectedNX || nzVoxel.connection[DIRECTION.NY] !== connectedNY
@@ -171,86 +169,58 @@ export default class StoneWallStrategy {
 					[DIRECTION.PZ]: 0,
 				};
 
-				const isMinX = x === 0;
-				const isMaxX = x === width - 1;
-				const isMinY = y === 0;
-				const isMaxY = y === height - 1;
-				const isVoxelOnEdge = isMinX || isMaxX || isMinY || isMaxY;
-				const occlusionAmount = 0.6;
+				if (isToppest) {
+					// Occlusion calculation of the top plane
+					const maxSlope = {
+						[DIRECTION.PX]: 0,
+						[DIRECTION.NX]: 0,
+						[DIRECTION.PY]: 0,
+						[DIRECTION.NY]: 0,
+					};
+					const tileDepth = SIZE.SIDE.HEIGHT / GRID_INTERVAL;
+					const voxAbsX = width * x + voxX;
+					const voxAbsY = height * y + voxY;
 
-				if (isVoxelOnEdge) {
-					const zCheckDirs = [];
+					for (const lineX of range(map.size[0])) {
+						if (lineX === x) continue;
 
-					if (isMinX) {
-						zCheckDirs.push(DIR8.W);
-						if (!isTopFloor && heightDiff[DIR8.W] === -1) occlusion[DIRECTION.NX] = occlusionAmount;
-					} else if (isMaxX) {
-						zCheckDirs.push(DIR8.E);
-						if (!isTopFloor && heightDiff[DIR8.E] === -1) occlusion[DIRECTION.PX] = occlusionAmount;
+						const checkingPosHeight = map.getHeight(lineX, y);
+						const heightDiff = checkingPosHeight - (z + 1);
+						const checkingVoxX = lineX < x
+							? width * lineX + width - 1
+							: width * lineX + 0;
+						const slope = (heightDiff * tileDepth) / Math.abs(voxAbsX - checkingVoxX);
+
+						if (lineX < x) {
+							maxSlope[DIRECTION.NX] = Math.max(slope, maxSlope[DIRECTION.NX]);
+						} else {
+							maxSlope[DIRECTION.PX] = Math.max(slope, maxSlope[DIRECTION.PX]);
+						}
 					}
-					if (isMinY) {
-						zCheckDirs.push(DIR8.S);
-						if (!isTopFloor && heightDiff[DIR8.S] === -1) occlusion[DIRECTION.NY] = occlusionAmount;
-					} else if (isMaxY) {
-						zCheckDirs.push(DIR8.N);
-						if (!isTopFloor && heightDiff[DIR8.N] === -1) occlusion[DIRECTION.PY] = occlusionAmount;
-					}
+					for (const lineY of range(map.size[1])) {
+						if (lineY === y) continue;
 
-					if (isMinX && isMinY) {
-						if (heightDiff[DIR8.W] === 0 && heightDiff[DIR8.S] === 0) {
-							zCheckDirs.push(DIR8.SW);
-						}
-						if (heightDiff[DIR8.SW] >= 0) {
-							occlusion[DIRECTION.NX] = occlusionAmount;
-							occlusion[DIRECTION.NY] = occlusionAmount;
-						}
-						if (!isTopFloor && heightDiff[DIR8.SW] === -1) {
-							if (heightDiff[DIR8.W] < 0) occlusion[DIRECTION.NX] = occlusionAmount;
-							if (heightDiff[DIR8.S] < 0) occlusion[DIRECTION.NY] = occlusionAmount;
-						}
-					} else if (isMinX && isMaxY) {
-						if (heightDiff[DIR8.W] === 0 && heightDiff[DIR8.N] === 0) {
-							zCheckDirs.push(DIR8.NW);
-						}
-						if (heightDiff[DIR8.NW] >= 0) {
-							occlusion[DIRECTION.NX] = occlusionAmount;
-							occlusion[DIRECTION.PY] = occlusionAmount;
-						}
-						if (!isTopFloor && heightDiff[DIR8.NW] === -1) {
-							if (heightDiff[DIR8.W] < 0) occlusion[DIRECTION.NX] = occlusionAmount;
-							if (heightDiff[DIR8.N] < 0) occlusion[DIRECTION.PY] = occlusionAmount;
-						}
-					} else if (isMaxX && isMinY) {
-						if (heightDiff[DIR8.E] === 0 && heightDiff[DIR8.S] === 0) {
-							zCheckDirs.push(DIR8.SE);
-						}
-						if (heightDiff[DIR8.SE] >= 0) {
-							occlusion[DIRECTION.PX] = occlusionAmount;
-							occlusion[DIRECTION.NY] = occlusionAmount;
-						}
-						if (!isTopFloor && heightDiff[DIR8.SE] === -1) {
-							if (heightDiff[DIR8.E] < 0) occlusion[DIRECTION.PX] = occlusionAmount;
-							if (heightDiff[DIR8.S] < 0) occlusion[DIRECTION.NY] = occlusionAmount;
-						}
-					} else if (isMaxX && isMaxY) {
-						if (heightDiff[DIR8.E] === 0 && heightDiff[DIR8.N] === 0) {
-							zCheckDirs.push(DIR8.NE);
-						}
-						if (heightDiff[DIR8.NE] >= 0) {
-							occlusion[DIRECTION.PX] = occlusionAmount;
-							occlusion[DIRECTION.PY] = occlusionAmount;
-						}
-						if (!isTopFloor && heightDiff[DIR8.NE] === -1) {
-							if (heightDiff[DIR8.E] < 0) occlusion[DIRECTION.PX] = occlusionAmount;
-							if (heightDiff[DIR8.N] < 0) occlusion[DIRECTION.PY] = occlusionAmount;
+						const checkingPosHeight = map.getHeight(x, lineY);
+						const heightDiff = checkingPosHeight - (z + 1);
+						const checkingVoxY = lineY < y
+							? height * lineY + height - 1
+							: height * lineY + 0;
+						const slope = (heightDiff * tileDepth) / Math.abs(voxAbsY - checkingVoxY);
+
+						if (lineY < y) {
+							maxSlope[DIRECTION.NY] = Math.max(slope, maxSlope[DIRECTION.NY]);
+						} else {
+							maxSlope[DIRECTION.PY] = Math.max(slope, maxSlope[DIRECTION.PY]);
 						}
 					}
 
-					const isPZOccluded = zCheckDirs.some(dir => heightDiff[dir] > 0);
-					occlusion[DIRECTION.PZ] = isPZOccluded ? occlusionAmount : 0;
+					const xOcclusion = (Math.atan(maxSlope[DIRECTION.NX]) + Math.atan(maxSlope[DIRECTION.PX])) / Math.PI;
+					const yOcclusion = (Math.atan(maxSlope[DIRECTION.NY]) + Math.atan(maxSlope[DIRECTION.PY])) / Math.PI;
+
+					occlusion[DIRECTION.PZ] = (xOcclusion + yOcclusion) / 2;
 				}
 
-				voxels[x][y] = {
+				voxels[voxX][voxY] = {
 					color,
 					connection: {
 						[DIRECTION.PX]: connectedPX,

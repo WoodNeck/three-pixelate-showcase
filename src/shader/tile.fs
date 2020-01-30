@@ -25,7 +25,7 @@ void main() {
 	vec3 lightTo = normalize(directionalLights[0].direction);
 	vec4 albedo = texture(albedoMap, vUv);
 	float ao = texture(aoMap, vUv).r;
-	float diffuse = .6 * (dot(vNormal, lightTo) * .5 + .5);
+	float diffuse = .6 * pow(dot(vNormal, lightTo) * .5 + .5, 4.);
 	vec3 ambient = .4 * (1. - ao) * ambientLightColor;
 
 	col = vec4(ambient + diffuse, 1) * albedo;

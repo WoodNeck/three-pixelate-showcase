@@ -30,12 +30,12 @@ export default class PixelatedLayer extends Layer {
 		// const viewDir = new THREE.Vector3(0, 0, -1).applyQuaternion(this._camera.quaternion);
 		// this._camera.position.add(viewDir.multiplyScalar(-30));
 
-		this._sun = new THREE.DirectionalLight(new THREE.Color("#fff"), 0.5);
+		this._sun = new THREE.DirectionalLight(new THREE.Color("#fff"));
 
-		this._sun.position.set(3, -3, 6);
+		this._sun.position.set(3, -3, -6);
 		this._sun.lookAt(0, 0, 0);
 
-		this._ambient = new THREE.AmbientLight(new THREE.Color("#fff"), 0.5);
+		this._ambient = new THREE.AmbientLight(new THREE.Color("#fff"));
 
 		this._scene.add(this._ambient);
 
@@ -46,7 +46,7 @@ export default class PixelatedLayer extends Layer {
 
 	public update(ms: number) {
 		const theta = -THREE.Math.DEG2RAD * ms / 50;
-		// this._sun.position.set(3 * Math.cos(theta), 3 * Math.sin(theta), 3);
+		// this._sun.position.set(3, 3 * Math.sin(theta), 6 * Math.cos(theta));
 		// this._sun.lookAt(0, 0, 0);
 		// this._camera.rotateOnWorldAxis(new THREE.Vector3(0, 0, 1), -THREE.Math.DEG2RAD * 0.3);
 	}
