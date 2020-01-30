@@ -13,15 +13,6 @@ export interface Voxel {
 		[DIRECTION.PZ]: boolean;
 		[DIRECTION.NZ]: boolean;
 	};
-	// Amount of occlusion
-	// Hemisphere with no occlusion is 0 and fully occluded is 1
-	occlusion: {
-		[DIRECTION.PX]: number;
-		[DIRECTION.NX]: number;
-		[DIRECTION.PY]: number;
-		[DIRECTION.NY]: number;
-		[DIRECTION.PZ]: number;
-	};
 }
 
 export interface Brick {

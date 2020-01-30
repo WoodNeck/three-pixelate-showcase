@@ -32,7 +32,7 @@ export default class PixelatedLayer extends Layer {
 
 		this._sun = new THREE.DirectionalLight(new THREE.Color("#fff"));
 
-		this._sun.position.set(3, -3, -6);
+		this._sun.position.set(3, -3, 6);
 		this._sun.lookAt(0, 0, 0);
 
 		this._ambient = new THREE.AmbientLight(new THREE.Color("#fff"));

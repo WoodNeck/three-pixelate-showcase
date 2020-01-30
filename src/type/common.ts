@@ -15,6 +15,5 @@ export interface Updateable {
 export interface TexturePack {
 	albedoMap: THREE.DataTexture;
 	displacementMap: THREE.DataTexture;
-	aoMap: THREE.DataTexture;
 	normalMap: THREE.DataTexture;
 }

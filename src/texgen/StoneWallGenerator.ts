@@ -56,18 +56,15 @@ export default class StoneWallGenerator {
 
 		const albedoMap = new THREE.DataTexture(topData.albedoData, width, height, THREE.RGBFormat, THREE.UnsignedByteType);
 		const displacementMap = new THREE.DataTexture(topData.displacementData, width, height, THREE.RGBFormat, THREE.UnsignedByteType);
-		const aoMap = new THREE.DataTexture(topData.aoData, width, height, THREE.RedFormat, THREE.FloatType);
 		const normalMap = new THREE.DataTexture(topData.normalData, width, height, THREE.RGBAFormat, THREE.FloatType);
 
 		albedoMap.flipY = true;
 		displacementMap.flipY = true;
-		aoMap.flipY = true;
 		normalMap.flipY = true;
 
 		return {
 			albedoMap,
 			displacementMap,
-			aoMap,
 			normalMap,
 		};
 	}
@@ -79,18 +76,15 @@ export default class StoneWallGenerator {
 
 		const albedoMap = new THREE.DataTexture(sideData.albedoData, width, height, THREE.RGBFormat, THREE.UnsignedByteType);
 		const displacementMap = new THREE.DataTexture(sideData.displacementData, width, height, THREE.RGBFormat, THREE.UnsignedByteType);
-		const aoMap = new THREE.DataTexture(sideData.aoData, width, height, THREE.RedFormat, THREE.FloatType);
 		const normalMap = new THREE.DataTexture(sideData.normalData, width, height, THREE.RGBAFormat, THREE.FloatType);
 
 		albedoMap.flipY = true;
 		displacementMap.flipY = true;
-		aoMap.flipY = true;
 		normalMap.flipY = true;
 
 		return {
 			albedoMap,
 			displacementMap,
-			aoMap,
 			normalMap,
 		};
 	}
@@ -98,7 +92,6 @@ export default class StoneWallGenerator {
 	private _generateTopData(x: number, y: number, z: number, side: DIRECTION): {
 		albedoData: Uint8Array,
 		displacementData: Uint8Array,
-		aoData: Float32Array,
 		normalData: Float32Array,
 	} {
 		const outline = this._outline;
@@ -111,7 +104,6 @@ export default class StoneWallGenerator {
 
 		const albedoData = new Uint8Array(3 * textureSize); // 0 ~ 255
 		const displacementData = new Uint8Array(3 * textureSize); // 0 ~ 255
-		const aoData = new Float32Array(textureSize); // 0 ~ 1
 		const normalData = new Float32Array(4 * textureSize); // 0 ~ 1
 
 		const topBricks = this._bricks.get(this._tileIndexAt(x, y, z))![TEXTURE.BRICK_FLOOR.TOP];
@@ -138,14 +130,12 @@ export default class StoneWallGenerator {
 					albedoData[3 * texelIndex + 1] = voxel.color[1];
 					albedoData[3 * texelIndex + 2] = voxel.color[2];
 				}
-				aoData[texelIndex] = voxel.occlusion[DIRECTION.PZ];
 			}
 		}
 
 		return {
 			albedoData,
 			displacementData,
-			aoData,
 			normalData,
 		};
 	}
@@ -153,7 +143,6 @@ export default class StoneWallGenerator {
 	private _generateSideData(x: number, y: number, z: number, side: DIRECTION): {
 		albedoData: Uint8Array,
 		displacementData: Uint8Array,
-		aoData: Float32Array,
 		normalData: Float32Array,
 	} {
 		const outline = this._outline;
@@ -166,7 +155,6 @@ export default class StoneWallGenerator {
 
 		const albedoData = new Uint8Array(3 * textureSize); // 0 ~ 255
 		const displacementData = new Uint8Array(3 * textureSize); // 0 ~ 255
-		const aoData = new Float32Array(textureSize); // 0 ~ 1
 		const normalData = new Float32Array(4 * textureSize); // 0 ~ 1
 
 		const brick = this._bricks.get(this._tileIndexAt(x, y, z))!;
@@ -221,7 +209,6 @@ export default class StoneWallGenerator {
 						albedoData[3 * texelIndex + 1] = colors[gridX][1];
 						albedoData[3 * texelIndex + 2] = colors[gridX][2];
 					}
-					aoData[texelIndex] = voxel.occlusion[side];
 				}
 			}
 		});
@@ -229,7 +216,6 @@ export default class StoneWallGenerator {
 		return {
 			albedoData,
 			displacementData,
-			aoData,
 			normalData,
 		};
 	}

@@ -98,7 +98,6 @@ export default class Tile implements Entity {
 			{
 				albedoMap: new THREE.Uniform(texturePack.albedoMap),
 				displacementMap: new THREE.Uniform(texturePack.displacementMap),
-				aoMap: new THREE.Uniform(texturePack.aoMap),
 				normalMap: new THREE.Uniform(texturePack.normalMap),
 			},
 		]);

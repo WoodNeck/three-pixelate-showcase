@@ -160,66 +160,6 @@ export default class StoneWallStrategy {
 					color = nzVoxel!.color;
 				}
 
-				// Ambient occlusion calculation based of neighbor heights.
-				const occlusion = {
-					[DIRECTION.PX]: 0,
-					[DIRECTION.NX]: 0,
-					[DIRECTION.PY]: 0,
-					[DIRECTION.NY]: 0,
-					[DIRECTION.PZ]: 0,
-				};
-
-				if (isToppest) {
-					// Occlusion calculation of the top plane
-					const maxSlope = {
-						[DIRECTION.PX]: 0,
-						[DIRECTION.NX]: 0,
-						[DIRECTION.PY]: 0,
-						[DIRECTION.NY]: 0,
-					};
-					const tileDepth = SIZE.SIDE.HEIGHT / GRID_INTERVAL;
-					const voxAbsX = width * x + voxX;
-					const voxAbsY = height * y + voxY;
-
-					for (const lineX of range(map.size[0])) {
-						if (lineX === x) continue;
-
-						const checkingPosHeight = map.getHeight(lineX, y);
-						const heightDiff = checkingPosHeight - (z + 1);
-						const checkingVoxX = lineX < x
-							? width * lineX + width - 1
-							: width * lineX + 0;
-						const slope = (heightDiff * tileDepth) / Math.abs(voxAbsX - checkingVoxX);
-
-						if (lineX < x) {
-							maxSlope[DIRECTION.NX] = Math.max(slope, maxSlope[DIRECTION.NX]);
-						} else {
-							maxSlope[DIRECTION.PX] = Math.max(slope, maxSlope[DIRECTION.PX]);
-						}
-					}
-					for (const lineY of range(map.size[1])) {
-						if (lineY === y) continue;
-
-						const checkingPosHeight = map.getHeight(x, lineY);
-						const heightDiff = checkingPosHeight - (z + 1);
-						const checkingVoxY = lineY < y
-							? height * lineY + height - 1
-							: height * lineY + 0;
-						const slope = (heightDiff * tileDepth) / Math.abs(voxAbsY - checkingVoxY);
-
-						if (lineY < y) {
-							maxSlope[DIRECTION.NY] = Math.max(slope, maxSlope[DIRECTION.NY]);
-						} else {
-							maxSlope[DIRECTION.PY] = Math.max(slope, maxSlope[DIRECTION.PY]);
-						}
-					}
-
-					const xOcclusion = (Math.atan(maxSlope[DIRECTION.NX]) + Math.atan(maxSlope[DIRECTION.PX])) / Math.PI;
-					const yOcclusion = (Math.atan(maxSlope[DIRECTION.NY]) + Math.atan(maxSlope[DIRECTION.PY])) / Math.PI;
-
-					occlusion[DIRECTION.PZ] = (xOcclusion + yOcclusion) / 2;
-				}
-
 				voxels[voxX][voxY] = {
 					color,
 					connection: {
@@ -230,7 +170,6 @@ export default class StoneWallStrategy {
 						[DIRECTION.PZ]: connectedPZ,
 						[DIRECTION.NZ]: connectedNZ,
 					},
-					occlusion,
 				};
 			}
 		}
