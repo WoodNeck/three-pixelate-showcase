@@ -5,6 +5,7 @@ import vertexShader from "@/shader/tile.vs";
 import fragmentShader from "@/shader/tile.fs";
 import { DIRECTION } from "@/const/common";
 import { TexturePack } from "@/type/common";
+import { SIZE } from "@/const/texture";
 
 const depthModifier = 2 / Math.sqrt(3);
 const widthModifier = 2 * Math.SQRT2;
@@ -30,11 +31,11 @@ export default class Tile implements Entity {
 				case DIRECTION.NX:
 				case DIRECTION.PY:
 				case DIRECTION.NY:
-					geometry = new THREE.PlaneGeometry(widthModifier, depthModifier);
+					geometry = new THREE.PlaneGeometry(widthModifier, depthModifier, SIZE.SIDE.WIDTH + 1, SIZE.SIDE.HEIGHT + 1);
 					break;
 				case DIRECTION.PZ:
 				case DIRECTION.NZ:
-					geometry = new THREE.PlaneGeometry(widthModifier, widthModifier);
+					geometry = new THREE.PlaneGeometry(widthModifier, widthModifier, SIZE.TOP.WIDTH + 1, SIZE.TOP.HEIGHT + 1);
 					break;
 			}
 

@@ -8,7 +8,6 @@ import StoneWallTexturePack from "@/texgen/StoneWallGenerator";
 import * as COLORS from "@/palette/colors";
 import { range } from "@/util";
 import { TILE_TYPES } from "@/const/common";
-import { TexturePack } from "@/type/common";
 
 export default class MapLoader {
 	public async load(mapName: string): Promise<TileMap> {
@@ -28,7 +27,7 @@ export default class MapLoader {
 		const mapY = mapSize[1];
 		const map = new TileMap(mapSize, heights);
 
-		const stoneWallTextureGenerator = new StoneWallTexturePack(map, COLORS.STONE_BRICK);
+		const stoneWallTextureGenerator = new StoneWallTexturePack(map, COLORS.ICE_CREAM_GB);
 
 		for (const y of range(mapY)) {
 			for (const x of range(mapX)) {

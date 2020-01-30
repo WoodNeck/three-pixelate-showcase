@@ -130,6 +130,12 @@ export default class StoneWallGenerator {
 					albedoData[3 * texelIndex + 1] = voxel.color[1];
 					albedoData[3 * texelIndex + 2] = voxel.color[2];
 				}
+
+				if (gridOffsetX > 0 && gridOffsetX < gridInterval - 1 && gridOffsetY > 0 && gridOffsetY < gridInterval - 1) {
+					displacementData[3 * texelIndex + 0] = 255;
+					displacementData[3 * texelIndex + 0] = 255;
+					displacementData[3 * texelIndex + 0] = 255;
+				}
 			}
 		}
 
