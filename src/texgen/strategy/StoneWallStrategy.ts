@@ -9,7 +9,7 @@ import TileMap from "@/map/TileMap";
 
 export default class StoneWallStrategy {
 	public createBrick(ctx: BrickStrategyContext): Brick {
-		const { map, pos, palette, neighbors } = ctx;
+		const { map, pos, palette, hasSameTypeOnTop, neighbors } = ctx;
 		const [x, y, z] = pos;
 
 		const height = z + 1;
@@ -57,7 +57,7 @@ export default class StoneWallStrategy {
 			neighbors: topNeighbors,
 			isLastX: isLastX || shouldSplitX,
 			isLastY: isLastY || shouldSplitY,
-			shouldSplitZ: isToppest,
+			shouldSplitZ: !hasSameTypeOnTop || isToppest,
 			isToppest,
 		});
 
@@ -153,7 +153,7 @@ export default class StoneWallStrategy {
 					color = nyVoxel!.color;
 				}
 
-				if (connectedNZ) {
+				if (connectedNZ && nzVoxel) {
 					connectedPX = nzVoxel!.connection[DIRECTION.PX];
 					connectedPY = nzVoxel!.connection[DIRECTION.PY];
 					nzVoxel!.connection[DIRECTION.PZ] = true;

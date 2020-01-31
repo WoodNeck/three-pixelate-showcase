@@ -15,5 +15,11 @@ export enum DIR8 {
 }
 
 export enum TILE_TYPES {
-	STONE_WALL,
+	STONE_WALL,   // 0
+	WOODEN_PLANK, // 1
+	GRAVEL,       // 2
+	WATER,        // 3
+	GRASS,        // 4
+	ROCKY_GROUND, // 5
+	DIRT,         // 6
 }

@@ -24,6 +24,7 @@ export interface BrickStrategyContext {
 	map: TileMap;
 	pos: Vec3;
 	palette: Vec3[];
+	hasSameTypeOnTop: boolean;
 	neighbors: {
 		[DIRECTION.NX]?: Brick,
 		[DIRECTION.NY]?: Brick,

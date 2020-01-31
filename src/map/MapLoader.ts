@@ -4,10 +4,11 @@ import { parse } from "papaparse";
 import Tile from "@/entity/Tile";
 import TileMap from "./TileMap";
 import TextureGenerator from "@/texgen/TextureGenerator";
-import StoneWallTexturePack from "@/texgen/StoneWallGenerator";
+import StoneWallGenerator from "@/texgen/StoneWallGenerator";
 import * as COLORS from "@/palette/colors";
 import { range } from "@/util";
 import { TILE_TYPES } from "@/const/common";
+import DirtGenerator from "@/texgen/DirtGenerator";
 
 export default class MapLoader {
 	public async load(mapName: string): Promise<TileMap> {
@@ -27,7 +28,11 @@ export default class MapLoader {
 		const mapY = mapSize[1];
 		const map = new TileMap(mapSize, heights);
 
-		const stoneWallTextureGenerator = new StoneWallTexturePack(map, COLORS.ICE_CREAM_GB);
+		const stoneWallTextureGenerator = new StoneWallGenerator(map, COLORS.STONE_BRICK);
+		const dirtTextureGenerator = new DirtGenerator(map, COLORS.SUPER_GAMEBOY);
+		const woodPlankTextureGenerator = new StoneWallGenerator(map, COLORS.SWEETIE16);
+		const waterTextureGenerator = new StoneWallGenerator(map, COLORS.ENDESGA16);
+		const grassTextureGenerator = new StoneWallGenerator(map, COLORS.INDECISION);
 
 		for (const y of range(mapY)) {
 			for (const x of range(mapX)) {
@@ -42,6 +47,7 @@ export default class MapLoader {
 				const stack = map.get(x, y);
 				for (const z of range(stack.height)) {
 					const tileType = tileTypes[z];
+					const topTileType = tileTypes[z + 1];
 					const h = z + 1;
 					const planeVisibility = [
 						h > pxHeight,
@@ -57,11 +63,25 @@ export default class MapLoader {
 						case TILE_TYPES.STONE_WALL:
 							generator = stoneWallTextureGenerator;
 							break;
+						case TILE_TYPES.DIRT:
+						case TILE_TYPES.GRAVEL:
+						case TILE_TYPES.ROCKY_GROUND:
+							generator = dirtTextureGenerator;
+							break;
+						case TILE_TYPES.GRASS:
+							generator = grassTextureGenerator;
+							break;
+						case TILE_TYPES.WATER:
+							generator = waterTextureGenerator;
+							break;
+						case TILE_TYPES.WOODEN_PLANK:
+							generator = woodPlankTextureGenerator;
+							break;
 						default:
 							throw new Error(`Tile Type is not defined on (${x}, ${y}, ${z}) - ${tileType}`);
 					}
 
-					generator.prepare(x, y, z);
+					generator.prepare(x, y, z, tileType === topTileType);
 					const texturePacks = planeVisibility.map((visible, direction) => {
 						if (!visible) return;
 

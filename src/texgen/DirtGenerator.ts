@@ -2,15 +2,16 @@ import * as THREE from "three";
 
 import TileMap from "@/map/TileMap";
 import StoneWallStrategy from "./strategy/StoneWallStrategy";
-import { range, parseColorHex } from "@/util";
+import { range, random, parseColorHex } from "@/util";
 import { DIRECTION } from "@/const/common";
 import * as TEXTURE from "@/const/texture";
+import * as COLORS from "@/palette/colors";
 import { TexturePack, Palette, Vec3 } from "@/type/common";
 import { Brick, Voxel } from "@/type/texture";
 import TextureGenerator from "./TextureGenerator";
 
-// Procedually generated stone wall texture
-export default class StoneWallGenerator implements TextureGenerator {
+// Procedually generated dirt tile texture
+export default class DirtGenerator implements TextureGenerator {
 	private _map: TileMap;
 	private _bricks: Map<number, Brick>;
 	private _outline: Vec3;
