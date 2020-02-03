@@ -7,8 +7,7 @@ import * as TEXTURE from "@/const/texture";
 import { TexturePack, Palette } from "@/type/common";
 import TextureGenerator from "./TextureGenerator";
 
-// Procedually generated dirt tile texture
-export default class DirtGenerator implements TextureGenerator {
+export default class PlankGenerator implements TextureGenerator {
 	private _map: TileMap;
 
 	constructor(map: TileMap, palette: Palette) {
@@ -78,7 +77,7 @@ export default class DirtGenerator implements TextureGenerator {
 		const displacementData = new Uint8Array(3 * textureSize); // 0 ~ 255
 		const normalData = new Float32Array(4 * textureSize); // 0 ~ 1
 
-		const color = parseColorHex("#B8AF5A");
+		const color = parseColorHex("#644924");
 
 		for (const texX of range(width)) {
 			for (const texY of range(height)) {
@@ -111,7 +110,7 @@ export default class DirtGenerator implements TextureGenerator {
 		const displacementData = new Uint8Array(3 * textureSize); // 0 ~ 255
 		const normalData = new Float32Array(4 * textureSize); // 0 ~ 1
 
-		const color = parseColorHex("#B8AF5A");
+		const color = parseColorHex("#644924");
 
 		[TEXTURE.BRICK_FLOOR.TOP, TEXTURE.BRICK_FLOOR.BOTTOM].forEach((floor, floorIdx) => {
 			for (const texX of range(width)) {

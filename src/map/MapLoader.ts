@@ -9,6 +9,9 @@ import * as COLORS from "@/palette/colors";
 import { range } from "@/util";
 import { TILE_TYPES } from "@/const/common";
 import DirtGenerator from "@/texgen/DirtGenerator";
+import PlankGenerator from "@/texgen/PlankGenerator";
+import GrassGenerator from "@/texgen/GrassGenerator";
+import WaterGenerator from "@/texgen/WaterGenerator";
 
 export default class MapLoader {
 	public async load(mapName: string): Promise<TileMap> {
@@ -30,9 +33,9 @@ export default class MapLoader {
 
 		const stoneWallTextureGenerator = new StoneWallGenerator(map, COLORS.STONE_BRICK);
 		const dirtTextureGenerator = new DirtGenerator(map, COLORS.SUPER_GAMEBOY);
-		const woodPlankTextureGenerator = new StoneWallGenerator(map, COLORS.SWEETIE16);
-		const waterTextureGenerator = new StoneWallGenerator(map, COLORS.ENDESGA16);
-		const grassTextureGenerator = new StoneWallGenerator(map, COLORS.INDECISION);
+		const plankTextureGenerator = new PlankGenerator(map, COLORS.SWEETIE16);
+		const waterTextureGenerator = new WaterGenerator(map, COLORS.ENDESGA16);
+		const grassTextureGenerator = new GrassGenerator(map, COLORS.INDECISION);
 
 		for (const y of range(mapY)) {
 			for (const x of range(mapX)) {
@@ -54,7 +57,7 @@ export default class MapLoader {
 						h > nxHeight,
 						h > pyHeight,
 						h > nyHeight,
-						h === stack.height,
+						h === stack.height || topTileType === TILE_TYPES.WATER,
 						false, // h === 0, Bottom tile is always not visible
 					];
 
@@ -75,7 +78,7 @@ export default class MapLoader {
 							generator = waterTextureGenerator;
 							break;
 						case TILE_TYPES.WOODEN_PLANK:
-							generator = woodPlankTextureGenerator;
+							generator = plankTextureGenerator;
 							break;
 						default:
 							throw new Error(`Tile Type is not defined on (${x}, ${y}, ${z}) - ${tileType}`);
