@@ -1,10 +1,12 @@
 import * as THREE from "three";
 import Axes, { PanInput, MoveKeyInput } from "@egjs/axes";
+import { Vector3 } from "three";
 
 export default class Controls {
 	private _camera: THREE.Camera;
 	private _axes: Axes;
 	private _animating: boolean;
+	private _lookAtPos: THREE.Vector3;
 
 	constructor(camera: THREE.Camera) {
 		this._camera = camera;
@@ -17,6 +19,7 @@ export default class Controls {
 			deceleration: 0.0024,
 		});
 		this._animating = false;
+		this._lookAtPos = new Vector3(0, 0, 0);
 
 		const panInput = new PanInput(document.documentElement, {
 			scale: [0.10],
@@ -50,6 +53,15 @@ export default class Controls {
 		this._axes.on("animationEnd", () => {
 			this._animating = false;
 		});
+	}
+
+	private _setPosition() {
+		const camera = this._camera;
+		const yaw = this._axes.get().yaw;
+
+		const newPos = new THREE.Vector3(0, 0, 10);
+
+		camera.lookAt(this._lookAtPos);
 	}
 
 	private _setupKeys() {

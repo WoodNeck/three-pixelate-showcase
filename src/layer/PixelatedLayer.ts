@@ -23,7 +23,7 @@ export default class PixelatedLayer extends Layer {
 		this._scene = new THREE.Scene();
 		this._scene.background = new THREE.Color("#1a1c2c");
 
-		this._camera = new THREE.OrthographicCamera(0, 0, 0, 0, -120, 120);
+		this._camera = new THREE.OrthographicCamera(0, 0, 0, 0, -20, 220);
 		this._camera.rotateZ(-THREE.Math.DEG2RAD * 45);
 		this._camera.rotateX(THREE.Math.DEG2RAD * 60);
 
